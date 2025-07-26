@@ -1,0 +1,20 @@
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<h1>404 Not Found</h1>
+<ul>
+<li>Code: NoSuchKey</li>
+<li>Message: The specified key does not exist.</li>
+<li>Key: public/bootstrap/3.0.2/fonts/glyphicons-halflings-regular.woff2</li>
+<li>RequestId: 89CCXYR214WF5G6H</li>
+<li>HostId: sahP/E6OVyGsZ4H0wphze/cCgPft4tQlwgXnGpA43l5VwLCsR5gZBrKwdtfpzXBOKWt6V3MvInke869KSe8FwS5Su0wFGVIM3a9HKzqGX4Q=</li>
+</ul>
+<h3>An Error Occurred While Attempting to Retrieve a Custom Error Document</h3>
+<ul>
+<li>Code: NoSuchKey</li>
+<li>Message: The specified key does not exist.</li>
+<li>Key: index.html</li>
+</ul>
+<hr/>
+</body>
+</html>
