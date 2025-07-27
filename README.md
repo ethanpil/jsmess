@@ -31,8 +31,8 @@ _2025-07-25_
 ## Credits
 
 #### Contributors
-Ethan Piliavin - [https://github.com/ethanpil](https://github.com/ethanpil)
-John Cipponeri ([@johncipponeri](http://twitter.com/johncipponeri))
+* Ethan Piliavin - [https://github.com/ethanpil](https://github.com/ethanpil)
+* John Cipponeri ([@johncipponeri](http://twitter.com/johncipponeri))
 
 #### Libraries & Resources
 * Ace ([link](http://ace.c9.io/))
