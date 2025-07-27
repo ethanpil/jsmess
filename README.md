@@ -1,9 +1,8 @@
-# JSTinker
-
-An open source clone of [JSFiddle](http://jsfiddle.net/), this project was made to provide insight into how something like this is created. My goal was to mimic as many of JSFiddle's features as possible in an offline environment. No accounts or internet connection totally necessary (besides online resources).
+# JSMess
+An open source (MIT) HTML/JS/CSS IDE and fiddling system. 
+JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which itself was inspired by [JSFiddle](http://jsfiddle.net/). 
 
 ## Features
-
 * HTML/CSS/JS Editors
 * Preview
 * Syntax checks
@@ -11,30 +10,37 @@ An open source clone of [JSFiddle](http://jsfiddle.net/), this project was made 
 * Script wrapping
 * Isolated iFrame sandbox
 
-## Contributing
+## Changelog
 
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
+_2025-07-26_
+* Rename project to JSMess
+
+_2025-07-25_
+* Forked from [Jstinker](https://github.com/johncipponeri/jstinker) 
+* Localized all third party CSS/JS libraries and fonts
+
+## Todo
+
+* Remove dropdown lists of libraries for inclusion
+* Implement autocomplete search of CDNJS collection for dynamic inclusion
+* Save/Export/Import function
+* New UX
+* Update original libraries and frameworks
+* Publish to jsmess.com
 
 ## Credits
 
-#### Contributers
+#### Contributors
+Ethan Piliavin - [https://github.com/ethanpil](https://github.com/ethanpil)
 John Cipponeri ([@johncipponeri](http://twitter.com/johncipponeri))
 
-#### Resources used
-Ace ([link](http://ace.c9.io/))
-
-JSBeautifier ([link](http://jsbeautifier.org/))
-
-Bootstrap 3.3.2 ([link](http://getbootstrap.com/))
-
-JQuery 2.1.3 ([link](http://blog.jquery.com/2014/12/18/jquery-1-11-2-and-2-1-3-released-safari-fail-safe-edition/))
-
-#### Inspiration
-JSFiddle ([link](http://jsfiddle.net/))
+#### Libraries & Resources
+* Ace ([link](http://ace.c9.io/))
+* JSBeautifier ([link](http://jsbeautifier.org/))
+* Bootstrap 3.3.2 ([link](http://getbootstrap.com/))
+* JQuery 2.1.3 ([link](http://blog.jquery.com/2014/12/18/jquery-1-11-2-and-2-1-3-released-safari-fail-safe-edition/))
+* Google Jules ([link](https://jules.google.com/)
+* GitHub
 
 ## License
 
