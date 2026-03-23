@@ -23,7 +23,7 @@ export function setLayout(layout) {
 
 export function getLayoutOptions() {
   return [
-    { id: 'classic', label: 'Classic (2x2)' },
+    { id: 'classic', label: 'Classic (2×2)' },
     { id: 'columns', label: 'Columns' },
   ];
 }
@@ -33,27 +33,45 @@ function destroySplits() {
   splits = [];
 }
 
+// Remove any leftover Split.js gutters from a container
+function removeGutters(container) {
+  container.querySelectorAll('.gutter').forEach(g => g.remove());
+}
+
 function applyLayout(layout) {
   destroySplits();
 
-  // Reset inline styles Split.js may have set
-  const allPanels = document.querySelectorAll('.editor-panel, .result-panel, .split-row');
-  allPanels.forEach(p => {
-    p.style.width = '';
-    p.style.height = '';
-    p.style.flex = '';
-  });
-
   const area = document.querySelector('.editor-area');
-  const topRow = document.getElementById('top-row');
-  const bottomRow = document.getElementById('bottom-row');
   if (!area) return;
 
+  const topRow = document.getElementById('top-row');
+  const bottomRow = document.getElementById('bottom-row');
+  const htmlPanel = document.getElementById('html-panel');
+  const cssPanel = document.getElementById('css-panel');
+  const jsPanel = document.getElementById('js-panel');
+  const resultPanel = document.getElementById('result-panel');
+
+  // Clean up gutters and inline styles from previous layout
+  removeGutters(area);
+  removeGutters(topRow);
+  removeGutters(bottomRow);
+
+  [htmlPanel, cssPanel, jsPanel, resultPanel, topRow, bottomRow].forEach(el => {
+    el.style.width = '';
+    el.style.height = '';
+    el.style.flex = '';
+  });
+
   if (layout === 'columns') {
-    // Single row with all 4 panels
+    // Move all panels to be direct children of .editor-area (Split.js needs shared parent)
+    topRow.style.display = 'none';
+    bottomRow.style.display = 'none';
     area.style.flexDirection = 'row';
-    topRow.style.display = 'contents';
-    bottomRow.style.display = 'contents';
+
+    area.appendChild(htmlPanel);
+    area.appendChild(cssPanel);
+    area.appendChild(jsPanel);
+    area.appendChild(resultPanel);
 
     splits.push(Split(['#html-panel', '#css-panel', '#js-panel', '#result-panel'], {
       sizes: [25, 25, 25, 25],
@@ -62,10 +80,16 @@ function applyLayout(layout) {
       onDragEnd: () => refreshEditors(),
     }));
   } else {
-    // Classic 2x2
+    // Classic 2×2: panels inside their row containers
     area.style.flexDirection = 'column';
     topRow.style.display = '';
     bottomRow.style.display = '';
+
+    // Reparent panels back into rows (in case they were moved for columns)
+    topRow.appendChild(htmlPanel);
+    topRow.appendChild(cssPanel);
+    bottomRow.appendChild(jsPanel);
+    bottomRow.appendChild(resultPanel);
 
     // Vertical split between rows
     splits.push(Split(['#top-row', '#bottom-row'], {
