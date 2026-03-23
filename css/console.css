@@ -1,0 +1,101 @@
+/* JSMess Console Panel */
+
+.console-output {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  background: var(--console-bg);
+  color: var(--console-text);
+  padding: 8px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.console-entry {
+  padding: 2px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.console-entry:last-child {
+  border-bottom: none;
+}
+
+.console-entry.log {
+  color: var(--console-text);
+}
+
+.console-entry.info {
+  color: var(--console-info);
+}
+
+.console-entry.warn {
+  color: var(--console-warn);
+  background: rgba(230, 219, 116, 0.08);
+}
+
+.console-entry.error {
+  color: var(--console-error);
+  background: rgba(244, 71, 71, 0.08);
+}
+
+.console-entry.debug {
+  color: var(--text-muted);
+}
+
+/* Console toolbar */
+.console-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 8px;
+  background: #1a1a1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.console-clear-btn {
+  font-size: 11px;
+  color: var(--console-text);
+  padding: 2px 8px;
+  border-radius: var(--radius);
+}
+
+.console-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.console-count {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Empty state */
+.console-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 16px;
+  text-align: center;
+}
+
+/* Object/Array preview */
+.console-object {
+  color: #9cdcfe;
+}
+
+.console-string {
+  color: #ce9178;
+}
+
+.console-number {
+  color: #b5cea8;
+}
+
+.console-boolean {
+  color: #569cd6;
+}
+
+.console-null {
+  color: #808080;
+}
