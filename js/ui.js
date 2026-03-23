@@ -5,11 +5,11 @@ import { run, onConsoleMessage } from './preview.js';
 import { formatAll } from './format.js';
 import { toggleTheme, isDark } from './themes.js';
 import {
-  saveFiddle,
-  forkFiddle,
-  listFiddles,
-  loadFiddle,
-  deleteFiddle,
+  saveMess,
+  forkMess,
+  listMesses,
+  loadMess,
+  deleteMess,
   exportToHash,
   exportToFile,
   importFromFile,
@@ -29,7 +29,7 @@ export function initUI() {
   setupToolbarActions();
   setupConsole();
   setupSettingsDrawer();
-  setupFiddlesModal();
+  setupMessesModal();
   setupLibrarySearch();
   updateLibraryTags();
   setupWrapModeSelector();
@@ -73,8 +73,8 @@ function setupToolbarActions() {
   const forkBtn = document.getElementById('btn-fork');
   if (forkBtn) {
     forkBtn.addEventListener('click', () => {
-      forkFiddle();
-      showToast('Fiddle forked!');
+      forkMess();
+      showToast('Forked!');
     });
   }
 
@@ -107,10 +107,10 @@ function setupToolbarActions() {
     settingsBtn.addEventListener('click', toggleSettings);
   }
 
-  // My Fiddles button
-  const fiddlesBtn = document.getElementById('btn-fiddles');
-  if (fiddlesBtn) {
-    fiddlesBtn.addEventListener('click', openFiddlesModal);
+  // My Messes button
+  const messesBtn = document.getElementById('btn-messes');
+  if (messesBtn) {
+    messesBtn.addEventListener('click', openMessesModal);
   }
 
   // Export button
@@ -131,7 +131,7 @@ function setupToolbarActions() {
         if (file) {
           try {
             await importFromFile(file);
-            showToast('Fiddle imported!');
+            showToast('Imported!');
             run();
           } catch (err) {
             showToast('Import failed: ' + err.message);
@@ -146,8 +146,8 @@ function setupToolbarActions() {
 }
 
 function handleSave() {
-  const title = get('title') || prompt('Fiddle name:', 'Untitled') || 'Untitled';
-  saveFiddle(title);
+  const title = get('title') || prompt('Name:', 'Untitled') || 'Untitled';
+  saveMess(title);
   showToast('Saved!');
 }
 
@@ -340,68 +340,68 @@ function updateLibraryTags() {
   }
 }
 
-// Fiddles modal
-function setupFiddlesModal() {
-  const overlay = document.getElementById('fiddles-modal');
-  const closeBtn = document.getElementById('fiddles-modal-close');
+// Messes modal
+function setupMessesModal() {
+  const overlay = document.getElementById('messes-modal');
+  const closeBtn = document.getElementById('messes-modal-close');
 
   if (overlay) {
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeFiddlesModal();
+      if (e.target === overlay) closeMessesModal();
     });
   }
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeFiddlesModal);
+    closeBtn.addEventListener('click', closeMessesModal);
   }
 }
 
-function openFiddlesModal() {
-  const modal = document.getElementById('fiddles-modal');
-  const list = document.getElementById('fiddles-list');
+function openMessesModal() {
+  const modal = document.getElementById('messes-modal');
+  const list = document.getElementById('messes-list');
   if (!modal || !list) return;
 
   modal.classList.remove('hidden');
 
-  const fiddles = listFiddles();
+  const messes = listMesses();
   list.innerHTML = '';
 
-  if (fiddles.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No saved fiddles yet.</p>';
+  if (messes.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No saved messes yet.</p>';
     return;
   }
 
-  for (const f of fiddles) {
+  for (const f of messes) {
     const item = document.createElement('div');
-    item.className = 'fiddle-item';
+    item.className = 'mess-item';
     const date = f.updatedAt ? new Date(f.updatedAt).toLocaleDateString() : '';
     item.innerHTML = `
       <div>
-        <div class="fiddle-item-title">${escapeHtml(f.title)}</div>
-        <div class="fiddle-item-date">${date}</div>
+        <div class="mess-item-title">${escapeHtml(f.title)}</div>
+        <div class="mess-item-date">${date}</div>
       </div>
-      <div class="fiddle-item-actions">
+      <div class="mess-item-actions">
         <button class="load" title="Load">Open</button>
         <button class="delete" title="Delete">&times;</button>
       </div>
     `;
     item.querySelector('.load').addEventListener('click', () => {
-      loadFiddle(f.id);
-      closeFiddlesModal();
+      loadMess(f.id);
+      closeMessesModal();
       run();
     });
     item.querySelector('.delete').addEventListener('click', (e) => {
       e.stopPropagation();
       if (confirm(`Delete "${f.title}"?`)) {
-        deleteFiddle(f.id);
-        openFiddlesModal(); // refresh list
+        deleteMess(f.id);
+        openMessesModal(); // refresh list
       }
     });
     list.appendChild(item);
   }
 }
 
-function closeFiddlesModal() {
-  const modal = document.getElementById('fiddles-modal');
+function closeMessesModal() {
+  const modal = document.getElementById('messes-modal');
   if (modal) modal.classList.add('hidden');
 }
 

@@ -340,7 +340,7 @@
   font-size: 12px;
 }
 
-/* My Fiddles modal */
+/* My Messes modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -392,12 +392,12 @@
   background: var(--bg-tertiary);
 }
 
-/* Fiddle list */
-.fiddle-list {
+/* Mess list */
+.mess-list {
   list-style: none;
 }
 
-.fiddle-item {
+.mess-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -409,37 +409,37 @@
   transition: background var(--transition-fast);
 }
 
-.fiddle-item:hover {
+.mess-item:hover {
   background: var(--bg-secondary);
 }
 
-.fiddle-item-title {
+.mess-item-title {
   font-weight: 500;
 }
 
-.fiddle-item-date {
+.mess-item-date {
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.fiddle-item-actions {
+.mess-item-actions {
   display: flex;
   gap: 4px;
 }
 
-.fiddle-item-actions button {
+.mess-item-actions button {
   padding: 4px 8px;
   border-radius: var(--radius);
   font-size: 11px;
   color: var(--text-muted);
 }
 
-.fiddle-item-actions button:hover {
+.mess-item-actions button:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
 }
 
-.fiddle-item-actions button.delete:hover {
+.mess-item-actions button.delete:hover {
   color: var(--console-error);
 }
 

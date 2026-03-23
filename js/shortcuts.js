@@ -18,7 +18,7 @@ export function initShortcuts() {
   // Ctrl/Cmd+S → Save
   registerShortcut('s', true, false, () => {
     document.dispatchEvent(new CustomEvent('action-save'));
-  }, 'Save fiddle');
+  }, 'Save mess');
 
   // Ctrl/Cmd+Shift+F → Format
   registerShortcut('f', true, true, () => {

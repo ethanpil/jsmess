@@ -4,14 +4,14 @@ import LZString from 'lz-string';
 import { getState, setMultiple, get } from './state.js';
 import { setContent } from './editors.js';
 
-const PREFIX = 'jsmess_fiddle_';
+const PREFIX = 'jsmess_mess_';
 
 export function generateId() {
   return Math.random().toString(36).substring(2, 10);
 }
 
-// Save current fiddle to localStorage
-export function saveFiddle(title) {
+// Save current mess to localStorage
+export function saveMess(title) {
   let id = get('id');
   if (!id) {
     id = generateId();
@@ -46,8 +46,8 @@ export function saveFiddle(title) {
   return id;
 }
 
-// Load fiddle from localStorage
-export function loadFiddle(id) {
+// Load mess from localStorage
+export function loadMess(id) {
   const raw = localStorage.getItem(PREFIX + id);
   if (!raw) return false;
 
@@ -67,33 +67,33 @@ export function loadFiddle(id) {
     setContent('js', data.js || '');
     return true;
   } catch (e) {
-    console.error('Failed to load fiddle:', e);
+    console.error('Failed to load mess:', e);
     return false;
   }
 }
 
 // Fork: clone current state with new ID
-export function forkFiddle() {
+export function forkMess() {
   const newId = generateId();
   setMultiple({ id: newId, title: get('title') + ' (fork)' });
-  saveFiddle();
+  saveMess();
   return newId;
 }
 
-// Delete fiddle
-export function deleteFiddle(id) {
+// Delete mess
+export function deleteMess(id) {
   localStorage.removeItem(PREFIX + id);
 }
 
-// List all saved fiddles
-export function listFiddles() {
-  const fiddles = [];
+// List all saved messes
+export function listMesses() {
+  const messes = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key && key.startsWith(PREFIX)) {
       try {
         const data = JSON.parse(localStorage.getItem(key));
-        fiddles.push({
+        messes.push({
           id: data.id,
           title: data.title,
           createdAt: data.createdAt,
@@ -104,7 +104,7 @@ export function listFiddles() {
       }
     }
   }
-  return fiddles.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  return messes.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 }
 
 // Encode state to shareable URL hash
@@ -121,7 +121,7 @@ export function exportToHash() {
   const compressed = LZString.compressToEncodedURIComponent(json);
 
   if (compressed.length > 2000) {
-    console.warn('Fiddle is large — URL may be truncated by some browsers.');
+    console.warn('Mess is large — URL may be truncated by some browsers.');
   }
 
   return `code=${compressed}`;
@@ -134,7 +134,7 @@ export function importFromHash() {
 
   if (hash.startsWith('id=')) {
     const id = hash.substring(3);
-    return loadFiddle(id);
+    return loadMess(id);
   }
 
   if (hash.startsWith('code=')) {
@@ -145,7 +145,7 @@ export function importFromHash() {
       const data = JSON.parse(json);
       setMultiple({
         id: null,
-        title: data.t || 'Shared Fiddle',
+        title: data.t || 'Shared Mess',
         html: data.h || '',
         css: data.c || '',
         js: data.j || '',
@@ -180,7 +180,7 @@ export function exportToFile() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${get('title') || 'fiddle'}.jsmess`;
+  a.download = `${get('title') || 'mess'}.jsmess`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -194,7 +194,7 @@ export function importFromFile(file) {
         const data = JSON.parse(reader.result);
         setMultiple({
           id: null,
-          title: data.title || 'Imported Fiddle',
+          title: data.title || 'Imported Mess',
           html: data.html || '',
           css: data.css || '',
           js: data.js || '',
