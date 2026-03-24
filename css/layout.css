@@ -269,6 +269,23 @@
   border-bottom-color: var(--accent);
 }
 
+/* Tabs layout - left container */
+#tabs-left {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#tabs-left .editor-panel {
+  flex: 1;
+  min-height: 0;
+}
+
+#tabs-left .editor-panel .panel-header {
+  display: none;
+}
+
 /* Settings drawer */
 .settings-drawer {
   position: fixed;

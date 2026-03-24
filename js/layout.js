@@ -2,7 +2,7 @@
 
 import Split from 'split.js';
 import { get, setState } from './state.js';
-import { refreshEditors } from './editors.js';
+import { refreshEditors, focusEditor } from './editors.js';
 
 let splits = [];
 
@@ -25,6 +25,7 @@ export function getLayoutOptions() {
   return [
     { id: 'classic', label: 'Classic (2×2)' },
     { id: 'columns', label: 'Columns' },
+    { id: 'tabs', label: 'Tabs' },
   ];
 }
 
@@ -62,6 +63,13 @@ function applyLayout(layout) {
     el.style.flex = '';
   });
 
+  // Clean up tabs layout container if it exists
+  const oldTabsLeft = document.getElementById('tabs-left');
+  if (oldTabsLeft) oldTabsLeft.remove();
+
+  // Ensure all editor panels are visible (tabs layout hides some)
+  [htmlPanel, cssPanel, jsPanel].forEach(el => el.classList.remove('hidden'));
+
   if (layout === 'columns') {
     // Move all panels to be direct children of .editor-area (Split.js needs shared parent)
     topRow.style.display = 'none';
@@ -76,6 +84,51 @@ function applyLayout(layout) {
     splits.push(Split(['#html-panel', '#css-panel', '#js-panel', '#result-panel'], {
       sizes: [25, 25, 25, 25],
       minSize: 80,
+      gutterSize: 6,
+      onDragEnd: () => refreshEditors(),
+    }));
+  } else if (layout === 'tabs') {
+    topRow.style.display = 'none';
+    bottomRow.style.display = 'none';
+    area.style.flexDirection = 'row';
+
+    // Create left container with tab bar
+    const tabsLeft = document.createElement('div');
+    tabsLeft.id = 'tabs-left';
+
+    const tabBar = document.createElement('div');
+    tabBar.className = 'tab-bar';
+    const tabs = [
+      { key: 'html', label: 'HTML', panel: htmlPanel },
+      { key: 'css', label: 'CSS', panel: cssPanel },
+      { key: 'js', label: 'JavaScript', panel: jsPanel },
+    ];
+    tabs.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-bar-btn' + (t.key === 'html' ? ' active' : '');
+      btn.textContent = t.label;
+      btn.dataset.tab = t.key;
+      btn.addEventListener('click', () => switchEditorTab(t.key, tabsLeft));
+      tabBar.appendChild(btn);
+    });
+    tabsLeft.appendChild(tabBar);
+
+    // Reparent editor panels into left container
+    tabsLeft.appendChild(htmlPanel);
+    tabsLeft.appendChild(cssPanel);
+    tabsLeft.appendChild(jsPanel);
+
+    // Show only HTML editor by default
+    htmlPanel.classList.remove('hidden');
+    cssPanel.classList.add('hidden');
+    jsPanel.classList.add('hidden');
+
+    area.appendChild(tabsLeft);
+    area.appendChild(resultPanel);
+
+    splits.push(Split(['#tabs-left', '#result-panel'], {
+      sizes: [50, 50],
+      minSize: 200,
       gutterSize: 6,
       onDragEnd: () => refreshEditors(),
     }));
@@ -119,4 +172,23 @@ function applyLayout(layout) {
 
   // Delay editor refresh for DOM to settle
   requestAnimationFrame(() => refreshEditors());
+}
+
+function switchEditorTab(key, container) {
+  const panels = { html: 'html-panel', css: 'css-panel', js: 'js-panel' };
+
+  Object.entries(panels).forEach(([k, id]) => {
+    const panel = document.getElementById(id);
+    if (k === key) panel.classList.remove('hidden');
+    else panel.classList.add('hidden');
+  });
+
+  container.querySelectorAll('.tab-bar-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === key);
+  });
+
+  requestAnimationFrame(() => {
+    refreshEditors();
+    focusEditor(key);
+  });
 }

@@ -11,7 +11,7 @@
 - [ ] autocomplete/suggestions
 - [x] Multiline editing
 - [ ] Additional Layouts
-    - [ ] Tabs
+    - [x] Tabs
     - [ ] Hide Console
     - [ ] Color themes
 - [ ] Auto Save
