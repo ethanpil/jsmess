@@ -2,14 +2,14 @@
 - [ ] Export/Download/Backup all Messes or just the current single one
 - [ ] SCSS / SASS
 - [ ] Typescript
-- [ ] Mini map
-- [ ] Undo / Redo history
+- [x] Mini map
+- [x] Undo / Redo history
 - [ ] Indent: Tab or [n] Spaces
 - [x] Show/Hide Line Numbers
 - [ ] Auto Close Brackets
-- [ ] Folding
+- [x] Folding
 - [ ] autocomplete/suggestions
-- [ ] Multiline editing
+- [x] Multiline editing
 - [ ] Additional Layouts
     - [ ] Tabs
     - [ ] Hide Console

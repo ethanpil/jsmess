@@ -12,10 +12,14 @@ JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which 
 
 ## Changelog
 
+_2026_03_24_
+* Mini Map
+* Undo / Redo Buttons
+
 _2026_03_23_
 * Rework and modernize the codebase. Complete rewrite
-* Latest codemirror
-* Add export/import functionality
+* Upgrade to latest codemirror
+* export/import functionality
 * Column or Grid Layout
 * Replace NPM package chooser with jsdelivr
 * Dark and light themes available
