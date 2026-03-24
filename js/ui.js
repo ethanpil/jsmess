@@ -22,7 +22,7 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers } from './editors.js';
+import { setLineNumbers, setMinimap } from './editors.js';
 
 let consoleEntries = [];
 
@@ -36,6 +36,7 @@ export function initUI() {
   setupWrapModeSelector();
   setupLayoutSelector();
   setupLineNumbersToggle();
+  setupMinimapToggle();
 
   // Listen for custom action events from shortcuts
   document.addEventListener('action-save', () => handleSave());
@@ -289,6 +290,21 @@ function setupLineNumbersToggle() {
     const show = toggle.checked;
     localStorage.setItem(LINENUMBERS_KEY, show);
     setLineNumbers(show);
+  });
+}
+
+// Minimap toggle
+const MINIMAP_KEY = 'jsmess_minimap';
+
+function setupMinimapToggle() {
+  const toggle = document.getElementById('minimap-toggle');
+  if (!toggle) return;
+
+  toggle.checked = localStorage.getItem(MINIMAP_KEY) === 'true';
+  toggle.addEventListener('change', () => {
+    const show = toggle.checked;
+    localStorage.setItem(MINIMAP_KEY, show);
+    setMinimap(show);
   });
 }
 

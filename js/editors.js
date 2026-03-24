@@ -6,13 +6,18 @@ import {
   html, css, javascript,
   oneDark,
   lineNumbers, highlightActiveLineGutter,
+  showMinimap,
 } from './cm.js';
 import { setState } from './state.js';
 
 const LINENUMBERS_KEY = 'jsmess_lineNumbers';
+const MINIMAP_KEY = 'jsmess_minimap';
+const MINIMAP_HIDE_DELAY = 1500;
 const themeCompartment = new Compartment();
 const lineNumbersCompartment = new Compartment();
+const minimapCompartment = new Compartment();
 const editors = {};
+const scrollCleanups = {};
 
 function getLineNumbersExtensions() {
   return [lineNumbers(), highlightActiveLineGutter()];
@@ -20,6 +25,18 @@ function getLineNumbersExtensions() {
 
 function isLineNumbersEnabled() {
   return localStorage.getItem(LINENUMBERS_KEY) !== 'false';
+}
+
+function isMinimapEnabled() {
+  return localStorage.getItem(MINIMAP_KEY) === 'true';
+}
+
+function getMinimapExtension() {
+  return showMinimap.compute(['doc'], () => ({
+    create: () => ({ dom: document.createElement('div') }),
+    displayText: 'blocks',
+    showOverlay: 'always',
+  }));
 }
 
 function createEditor(container, lang, stateKey, placeholder) {
@@ -37,6 +54,7 @@ function createEditor(container, lang, stateKey, placeholder) {
       extensions: [
         basicSetup,
         lineNumbersCompartment.of(isLineNumbersEnabled() ? getLineNumbersExtensions() : []),
+        minimapCompartment.of(isMinimapEnabled() ? getMinimapExtension() : []),
         langExtension,
         updateListener,
         themeCompartment.of([]),
@@ -55,6 +73,11 @@ function createEditor(container, lang, stateKey, placeholder) {
   });
 
   editors[stateKey] = view;
+
+  if (isMinimapEnabled()) {
+    attachScrollListener(stateKey, view);
+  }
+
   return view;
 }
 
@@ -115,6 +138,52 @@ export function setLineNumbers(show) {
     editor.dispatch({
       effects: lineNumbersCompartment.reconfigure(ext),
     });
+  }
+}
+
+export function setMinimap(show) {
+  if (show) {
+    // Enable the extension on all editors and attach scroll listeners
+    for (const [key, editor] of Object.entries(editors)) {
+      editor.dispatch({
+        effects: minimapCompartment.reconfigure(getMinimapExtension()),
+      });
+      attachScrollListener(key, editor);
+    }
+  } else {
+    // Disable the extension and remove scroll listeners
+    for (const [key, editor] of Object.entries(editors)) {
+      editor.dom.classList.remove('minimap-visible');
+      editor.dispatch({
+        effects: minimapCompartment.reconfigure([]),
+      });
+      detachScrollListener(key);
+    }
+  }
+}
+
+function attachScrollListener(key, editor) {
+  detachScrollListener(key);
+  let timer = null;
+  const scroller = editor.scrollDOM;
+  const handler = () => {
+    editor.dom.classList.add('minimap-visible');
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      editor.dom.classList.remove('minimap-visible');
+    }, MINIMAP_HIDE_DELAY);
+  };
+  scroller.addEventListener('scroll', handler);
+  scrollCleanups[key] = () => {
+    scroller.removeEventListener('scroll', handler);
+    clearTimeout(timer);
+  };
+}
+
+function detachScrollListener(key) {
+  if (scrollCleanups[key]) {
+    scrollCleanups[key]();
+    delete scrollCleanups[key];
   }
 }
 

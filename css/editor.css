@@ -116,6 +116,18 @@
   font-style: italic;
 }
 
+/* Minimap - hidden by default, shown only while scrolling */
+.cm-editor .cm-minimap-gutter {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.cm-editor.minimap-visible .cm-minimap-gutter {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Panel label icons */
 .panel-icon {
   display: inline-flex;

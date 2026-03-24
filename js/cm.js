@@ -3,7 +3,7 @@
 // We import all @codemirror/* packages without pinned versions so esm.sh resolves
 // them to consistent transitive dependency versions (avoiding duplicate @codemirror/state).
 
-const [stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM, darkM] =
+const [stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM, darkM, minimapM] =
   await Promise.all([
     import('https://esm.sh/@codemirror/state'),
     import('https://esm.sh/@codemirror/view'),
@@ -16,6 +16,7 @@ const [stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM,
     import('https://esm.sh/@codemirror/lang-css'),
     import('https://esm.sh/@codemirror/lang-javascript'),
     import('https://esm.sh/@codemirror/theme-one-dark'),
+    import('https://esm.sh/@replit/codemirror-minimap'),
   ]);
 
 // Core classes
@@ -29,6 +30,9 @@ export const { javascript } = jsM;
 
 // Theme
 export const { oneDark } = darkM;
+
+// Minimap
+export const { showMinimap } = minimapM;
 
 // Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
 // Exports for dynamic line-number toggling via Compartment
