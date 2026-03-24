@@ -12,6 +12,16 @@ JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which 
 
 ## Changelog
 
+_2026_03_23_
+* Rework and modernize the codebase. Complete rewrite
+* Latest codemirror
+* Add export/import functionality
+* Column or Grid Layout
+* Replace NPM package chooser with jsdelivr
+* Dark and light themes available
+* Consistent JSMess branding/naming
+* Line Number option toggle
+
 _2025-07-26_
 * Rename project to JSMess
 
@@ -31,16 +41,11 @@ _2025-07-25_
 ## Credits
 
 #### Contributors
+* Claude Opus
+* Claude Sonnet
+* Google Jules
 * Ethan Piliavin - [https://github.com/ethanpil](https://github.com/ethanpil)
 * John Cipponeri ([@johncipponeri](http://twitter.com/johncipponeri))
-
-#### Libraries & Resources
-* Ace ([link](http://ace.c9.io/))
-* JSBeautifier ([link](http://jsbeautifier.org/))
-* Bootstrap 3.3.2 ([link](http://getbootstrap.com/))
-* JQuery 2.1.3 ([link](http://blog.jquery.com/2014/12/18/jquery-1-11-2-and-2-1-3-released-safari-fail-safe-edition/))
-* Google Jules ([link](https://jules.google.com/)
-* GitHub
 
 ## License
 
