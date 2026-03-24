@@ -1,529 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Create a new tinker - JSMess</title>
-    
-    <!-- Latest jQuery from Google CDN -->
-    <script src="libs/jquery/jquery.min.js"></script>
-    <!-- Crypto JS -->
-    <script src="libs/aes-js/index.min.js"></script>
-    <!-- Beautify Web - HTML, CSS, JS -->
-    <script src="libs/beautify-web/beautify-html.js"></script>
-    <script src="libs/beautify-web/beautify-css.js"></script>
-    <script src="libs/beautify-web/beautify.js"></script>
-    <!-- Ace Editor -->
-    <script src="libs/ace/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="libs/ace/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
-    <!-- Together -->
-    <script src="libs/togetherjs/togetherjs-min.js"></script>
-    <!-- JSMess Scripts -->
-    <script src="jsmess.js"></script>
-    <!-- Bootstrap Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="libs/bootstrap/bootstrap.min.css">
-    <!-- Bootstrap Optional theme -->
-    <link rel="stylesheet" href="libs/bootstrap/bootstrap-theme.min.css">
-    <!-- Bootstrap Fonts -->
-    <link rel="stylesheet" href="libs/fonts/glyphicons-halflings-regular.eot">
-    <link rel="stylesheet" href="libs/fonts/glyphicons-halflings-regular.woff2">
-    <link rel="stylesheet" href="libs/fonts/glyphicons-halflings-regular.woff">
-    <link rel="stylesheet" href="libs/fonts/glyphicons-halflings-regular.ttf">
-    <link rel="stylesheet" href="libs/fonts/glyphicons-halflings-regular.svg">
-    <!-- JSMess Style -->
-    <link rel="stylesheet" href="jsmess.css" type="text/css">
-    <!-- Bootstrap Latest compiled and minified JavaScript -->
-    <script src="libs/bootstrap/bootstrap.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JSMess - Code Playground</title>
+  <meta name="description" content="JSMess is an open source HTML/CSS/JavaScript code playground. Write, test, and share web code instantly.">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="img/code-scan-svgrepo-com.svg">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/console.css">
+
+  <!-- Import Map - only non-CodeMirror deps (CM handled by js/cm.js wrapper) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "split.js": "https://esm.sh/split.js@1.6.5",
+      "lz-string": "https://esm.sh/lz-string@1.5.0"
+    }
+  }
+  </script>
+
+  <!-- App entry point -->
+  <script type="module" src="js/app.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-default">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#toolbar">
-                <span class="sr-only">Toggle toolbar</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#"><img src="img/code-scan-svgrepo-com.svg" height="24" style="display: inline; padding-right: 6px;">JSMess</a>
+  <div id="app">
+    <!-- Toolbar -->
+    <header class="toolbar">
+      <div class="toolbar-brand">
+        <img src="img/code-scan-svgrepo-com.svg" alt="JSMess" width="24" height="24">
+        <span>JSMess</span>
+      </div>
+
+      <div class="toolbar-actions">
+        <button id="btn-run" class="toolbar-btn primary" title="Run (Ctrl+Enter)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+          <span class="label-text">Run</span>
+        </button>
+
+        <button id="btn-format" class="toolbar-btn" title="Format (Ctrl+Shift+F)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H7M21 6H3M21 14H3M21 18H7"/></svg>
+          <span class="label-text">Tidy</span>
+        </button>
+
+        <div class="toolbar-separator"></div>
+
+        <button id="btn-save" class="toolbar-btn" title="Save (Ctrl+S)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+          <span class="label-text">Save</span>
+        </button>
+
+        <button id="btn-fork" class="toolbar-btn" title="Fork">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 01-2 2H8a2 2 0 01-2-2V9"/><line x1="12" y1="12" x2="12" y2="15"/></svg>
+          <span class="label-text">Fork</span>
+        </button>
+
+        <button id="btn-share" class="toolbar-btn" title="Share link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span class="label-text">Share</span>
+        </button>
+      </div>
+
+      <div class="toolbar-spacer"></div>
+
+      <div class="toolbar-right">
+        <button id="btn-messes" class="toolbar-btn" title="My Messes">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <span class="label-text">My Messes</span>
+        </button>
+
+        <button id="btn-export" class="toolbar-btn" title="Export as file">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span class="label-text">Export</span>
+        </button>
+
+        <button id="btn-import" class="toolbar-btn" title="Import file">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span class="label-text">Import</span>
+        </button>
+
+        <div class="toolbar-separator"></div>
+
+        <button id="btn-settings" class="toolbar-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </button>
+
+        <button id="btn-theme" class="toolbar-btn" title="Toggle theme">
+          <span class="theme-icon">&#9789;</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Editor Area - Split.js manages layout -->
+    <main class="editor-area">
+      <!-- Top Row: HTML + CSS -->
+      <div id="top-row" class="split-row">
+        <div class="editor-panel" id="html-panel">
+          <div class="panel-header">
+            <span class="label"><span class="panel-icon html">&#60;/&#62;</span> HTML</span>
+          </div>
+          <div class="panel-body"></div>
         </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="toolbar">
-            <ul class="nav navbar-nav">
-                <li id="btnRun"><a href=""><span class="glyphicon glyphicon-play" aria-hidden="true"></span> Run</a></li>
-                <li id="btnTidyUp"><a href=""><span class="glyphicon glyphicon-flash" aria-hidden="true"></span> TidyUp</a></li>
-                <li id="btnTogether"><a href=""><span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> Collaborate</button></li>
-            </ul>
-        </div><!-- /.navbar-collapse -->
-    </nav>
-
-    <!-- Sidebar -->
-    <div id="sidebar">
-        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-            <!-- Frameworks & Extensions -->
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingOne">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                            Frameworks & Extensions
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-                    <div class="panel-body">
-                        <div class="dropdown">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
-                                No-Library (pure JS)
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu1" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation" class="dropdown-header">jQuery</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery Compat (edge)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery (edge)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 2.1.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 2.0.2</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.11.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.10.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.9.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.8.3</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.7.2</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jQuery 1.6.4</a></li>
-
-                                <li role="presentation" class="dropdown-header">Prototype</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Prototype 1.7.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Prototype 1.6.1.0</a></li>
-
-                                <li role="presentation" class="dropdown-header">YUI</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.17.2</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.16.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.14.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.10.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.8.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.7.3</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.6.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 3.5.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">YUI 2.8.0r4</a></li>
-
-                                <li role="presentation" class="dropdown-header">No-Library</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">No-Library (pure JS)</a></li>
-
-                                <li role="presentation" class="dropdown-header">Dojo</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo (nightly)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.10.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.9.4</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.8.7</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.7.6</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.6.2</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Dojo 1.5.3</a></li>
-
-                                <li role="presentation" class="dropdown-header">Processing</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Processing.js 1.4.7</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Processing.js 1.4.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Processing.js 1.3.6</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Processing.js 1.2.3</a></li>
-
-                                <li role="presentation" class="dropdown-header">ExtJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">ExtJS 4.2.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">ExtJS 4.1.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">ExtJS 4.1.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">ExtJS 3.4.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">ExtJS 3.1.0</a></li>
-
-                                <li role="presentation" class="dropdown-header">Raphael</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Raphael 2.1.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Raphael 1.5.2 (min)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Raphael 1.4</a></li>
-
-                                <li role="presentation" class="dropdown-header">RightJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">RightJS 2.3.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">RightJS 2.1.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Three.js</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Three.js r54</a></li>
-
-                                <li role="presentation" class="dropdown-header">Zepto</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Zepto 1.0rc1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Enyo</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo (nightly)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo 2.5.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo 2.4.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo 2.2.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo 2.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Enyo 2.0.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Shipyard</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Shipyard (nightly)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Shipyard 0.2</a></li>
-
-                                <li role="presentation" class="dropdown-header">Knockout.js</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Knockout.js 3.0.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Knockout.js 2.3.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Knockout.js 2.2.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Knockout.js 2.1.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Knockout.js 2.0.0</a></li>
-
-                                <li role="presentation" class="dropdown-header">The X Toolkit</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">The X Toolkit edge</a></li>
-
-                                <li role="presentation" class="dropdown-header">AngularJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">AngularJS 1.2.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">AngularJS 1.1.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Ember</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Ember 1.3.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Underscore</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Underscore 1.4.4</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Underscore 1.4.3</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Underscore 1.3.3</a></li>
-
-                                <li role="presentation" class="dropdown-header">Bonsai</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Bonsai 0.4.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">KineticJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">KineticJS 4.3.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">KineticJS 4.0.5</a></li>
-
-                                <li role="presentation" class="dropdown-header">FabricJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">FabricJS 1.4.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">FabricJS 1.2.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">FabricJS 0.9</a></li>
-
-                                <li role="presentation" class="dropdown-header">qooxdoo</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">qooxdoo 2.1</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">qooxdoo 2.0.3</a></li>
-
-                                <li role="presentation" class="dropdown-header">D3</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">D3 3.0.4</a></li>
-
-                                <li role="presentation" class="dropdown-header">CreateJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">CreateJS 2013.09.25</a></li>
-
-                                <li role="presentation" class="dropdown-header">WebApp Install</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">WebApp Install 0.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Thorax</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Thorax 2.0.0rc6</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Thorax 2.0.0rc3</a></li>
-
-                                <li role="presentation" class="dropdown-header">Paper.js</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Paper.js 0.22</a></li>
-
-                                <li role="presentation" class="dropdown-header">React</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">React 0.9.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">React 0.8.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">React 0.4.0</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">React 0.3.2</a></li>
-
-                                <li role="presentation" class="dropdown-header">svg.js</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">svg.js 0.x (latest)</a></li>
-
-                                <li role="presentation" class="dropdown-header">Minified</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Minified 1.0 beta1</a></li>
-
-                                <li role="presentation" class="dropdown-header">jTypes</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">jTypes 2.1.0</a></li>
-
-                                <li role="presentation" class="dropdown-header">Lo-Dash</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Lo-Dash 2.2.1</a></li>
-
-                                <li role="presentation" class="dropdown-header">Brick</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Brick edge</a></li>
-
-                                <li role="presentation" class="dropdown-header">RactiveJS</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">RactiveJS Latest</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">RactiveJS Edge</a></li>
-
-                                <li role="presentation" class="dropdown-header">Vue</li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Vue (edge)</a></li>
-
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">Vue 0.11.0</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        <br>
-                        <div class="dropdown">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-expanded="true">
-                                onLoad
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu2" role="menu" aria-labelledby="dropdownMenu2">
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">onLoad</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">onDomReady</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">No wrap - in head</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">No wrap - in body</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Tinker Options -->
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingTwo">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                            Tinker Options
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-                    <div class="panel-body">
-                        <input type="text" placeholder="Name your Tinker">
-                        <textarea placeholder="Description"></textarea>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox"></input><span class="chk_lbl">Normalize css</span>
-                            </label>
-                        </div>
-                        <p>Body tag</p>
-                        <input type="text">
-                        <p>DTD</p>
-                        <div class="dropdown">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu3" data-toggle="dropdown" aria-expanded="true">
-                                HTML 5
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu3" role="menu" aria-labelledby="dropdownMenu3">
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">XHTML 1.0 Strict</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">XHTML 1.0 Transitional</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">HTML 5</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">HTML 4.01 Strict</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">HTML 4.01 Transitional</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">HTML 4.01 Frameset</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        <p>Framework script attribute</p>
-                        <input type="text" placeholder="ie. data-type=''">
-                    </div>
-                </div>
-            </div>
-            <!-- External Resources -->
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingThree">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
-                            External Resources
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                    <div class="panel-body">
-                        <input type="text" class="ext_res" placeholder="JavaScript/CSS URI">
-                        <button type="button" class="btn btn-default add">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- Languages -->
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingFour">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
-                            Languages
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
-                    <div class="panel-body">
-                        <div class="dropdown langcontainer">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle langbutton" type="button" id="dropdownMenu4" data-toggle="dropdown" aria-expanded="true">
-                                HTML
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu4" role="menu" aria-labelledby="dropdownMenu4">
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">HTML</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        <div class="dropdown langcontainer langright">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle langbutton" type="button" id="dropdownMenu5" data-toggle="dropdown" aria-expanded="true">
-                                CSS
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu5" role="menu" aria-labelledby="dropdownMenu5">
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">CSS</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">SCSS</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        <div class="dropdown langcontainer">
-                            <div class="btn-group">
-                            <button class="btn btn-default dropdown-toggle langbutton" type="button" id="dropdownMenu6" data-toggle="dropdown" aria-expanded="true">
-                                JavaScript
-                            <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu scrollable-menu" id="dropdownMenu6" role="menu" aria-labelledby="dropdownMenu6">
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">JavaScript</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">CoffeeScript</a></li>
-                                <li role="presentation"><a role="menuitem" tabindex="-1" href="">JavaScript 1.7</a></li>
-                            </ul>
-                            </div>
-                        </div>
-                        <div class="dropdown langcontainer langright">
-                            <div class="btn-group">
-                            <button class="btn btn-default langbutton" type="button" id="dropdownMenu7" data-toggle="dropdown" aria-expanded="true">
-                                Results
-                            </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Ajax Requests
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingFive">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
-                            Ajax Requests
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
-                    <div class="panel-body">
-                        Stuff
-                    </div>
-                </div>
-            </div> -->
-            <!-- Legal, Credits and Links -->
-            <div class="panel panel-default">
-                <div class="panel-heading" role="tab" id="headingSix">
-                    <h4 class="panel-title">
-                        <a data-toggle="collapse" data-parent="#accordion" href="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
-                            About
-                        </a>
-                    </h4>
-                </div>
-                <div id="collapseSix" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
-                    <div class="panel-body">
-                        <p>Go ahead and make a mess with your JS! :) This is an open source (MIT License) HTML/JS/CSS IDE and fiddling system. <a href="https://jsmess.com">JSMess</a> is a <a href="https://github.com/ethanpil/jsmess">fork</a> of <a title="JSMess Github" href="https://github.com/johncipponeri/jstinker">Jstinker </a>which itself was inspired by <a href="https://jsfiddle.net">JSFiddle</a>.</p>            
-                        <p> 
-                            <a title="JSMess Website" href="https://jssmess.com"> <img src="img/website-ui-web-svgrepo-com.svg" width="32" height="32"></a>
-                            <a title="JSMess Github" href="https://github.com/ethanpil/jsmess"> <img src="img/github-mark.svg" width="32" height="32"></a>
-                         </p>
-
-                    </div>
-                </div>
-            </div>
+        <div class="editor-panel" id="css-panel">
+          <div class="panel-header">
+            <span class="label"><span class="panel-icon css">{ }</span> CSS</span>
+          </div>
+          <div class="panel-body"></div>
         </div>
-    </div><!-- /sidebar -->
+      </div>
 
-    <div class="editors">
-        <div class="top">
-            <!-- HTML Editor -->
-            <div class="editorContainer">
-                <div class="editor" id="html-editor"></div>
-            </div>
-            <!-- CSS EDitor -->
-            <div class="editorContainer">
-                <div class="editor" id="css-editor"></div>
-            </div>
+      <!-- Bottom Row: JS + Result -->
+      <div id="bottom-row" class="split-row">
+        <div class="editor-panel" id="js-panel">
+          <div class="panel-header">
+            <span class="label"><span class="panel-icon js">JS</span> JavaScript</span>
+          </div>
+          <div class="panel-body"></div>
         </div>
-        <div class="bottom">
-            <!-- JS Editor -->
-            <div class="editorContainer">
-                <div class="editor" id="js-editor"></div>
+        <div class="result-panel" id="result-panel">
+          <div class="result-tabs">
+            <button id="tab-preview" class="result-tab active">Result</button>
+            <button id="tab-console" class="result-tab">Console <span id="console-count"></span></button>
+          </div>
+          <div class="result-content">
+            <div id="preview-view" class="result-view">
+              <iframe id="preview-frame" sandbox="allow-forms allow-popups allow-scripts allow-modals" title="Preview"></iframe>
             </div>
-            <!-- Preview -->
-            <div class="editorContainer">
-                <iframe class="editor" id="preview" name="result" sandbox="allow-forms allow-popups allow-scripts allow-same-origin" frameborder="0">
-                    #document
-                </iframe>
+            <div id="console-view" class="result-view hidden">
+              <div class="console-toolbar">
+                <span style="font-size:11px;color:var(--console-text);">Console</span>
+                <button id="btn-clear-console" class="console-clear-btn">Clear</button>
+              </div>
+              <div id="console-output" class="console-output">
+                <div class="console-empty">Console output will appear here...</div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Settings Drawer -->
+  <div id="settings-overlay" class="settings-overlay"></div>
+  <aside id="settings-drawer" class="settings-drawer">
+    <div class="settings-section">
+      <h3>Layout</h3>
+      <div class="settings-row">
+        <label>Layout</label>
+        <select id="layout-mode">
+          <option value="classic">Classic (2x2)</option>
+          <option value="left">Editors Left</option>
+          <option value="columns">Columns</option>
+        </select>
+      </div>
     </div>
 
+    <div class="settings-section">
+      <h3>Editor</h3>
+      <div class="settings-row">
+        <label for="line-numbers-toggle">Line numbers</label>
+        <input type="checkbox" id="line-numbers-toggle" checked>
+      </div>
     </div>
-    
-    <!-- Set Editor Modes -->
-    <script>
-        ace.require("ace/ext/language_tools");
 
-        var htmlEditor = ace.edit("html-editor");
-        htmlEditor.setTheme("ace/theme/crimson-editor");
-        htmlEditor.getSession().setMode("ace/mode/html");
-        htmlEditor.setOptions({
-            enableBasicAutocompletion: true
-        });
+    <div class="settings-section">
+      <h3>Script Loading</h3>
+      <div class="settings-row">
+        <label>Wrap mode</label>
+        <select id="wrap-mode">
+          <option value="onLoad">onLoad</option>
+          <option value="onDomReady">onDomReady</option>
+          <option value="noWrapHead">No wrap - in head</option>
+          <option value="noWrapBody">No wrap - in body</option>
+        </select>
+      </div>
+    </div>
 
-        var cssEditor = ace.edit("css-editor");
-        cssEditor.setTheme("ace/theme/crimson-editor");
-        cssEditor.getSession().setMode("ace/mode/css");
-        cssEditor.setOptions({
-            enableBasicAutocompletion: true
-        });
+    <div class="settings-section">
+      <h3>External Libraries</h3>
+      <div class="library-search">
+        <input type="text" id="library-search-input" placeholder="Search packages...">
+        <div id="library-search-results" class="library-search-results"></div>
+      </div>
+      <div id="library-tags" class="library-tags"></div>
+    </div>
 
-        var jsEditor = ace.edit("js-editor");
-        jsEditor.setTheme("ace/theme/crimson-editor");
-        jsEditor.getSession().setMode("ace/mode/javascript");
-        jsEditor.setOptions({
-            enableBasicAutocompletion: true
-        });
-    </script>
-    
+    <div class="settings-section">
+      <h3>About</h3>
+      <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;">
+        JSMess is an open source (MIT License) code playground.
+        <a href="https://github.com/ethanpil/jsmess">Fork on GitHub</a>.
+      </p>
+      <p style="margin-top:8px;">
+        <a href="https://github.com/ethanpil/jsmess" title="GitHub">
+          <img src="img/github-mark.svg" width="24" height="24" alt="GitHub" style="opacity:0.6;">
+        </a>
+      </p>
+    </div>
+  </aside>
+
+  <!-- My Messes Modal -->
+  <div id="messes-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <span>My Messes</span>
+        <button id="messes-modal-close" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="messes-list" class="mess-list"></div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

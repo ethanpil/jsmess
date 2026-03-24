@@ -1,0 +1,147 @@
+/* JSMess Editor - CodeMirror 6 Overrides */
+
+/* Ensure editor fills its container */
+.cm-editor {
+  height: 100%;
+  font-size: 13px;
+}
+
+.cm-editor .cm-scroller {
+  overflow: auto;
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+  line-height: 1.6;
+}
+
+.cm-editor .cm-content {
+  padding: 8px 0;
+}
+
+.cm-editor .cm-line {
+  padding: 0 8px;
+}
+
+/* Gutter styling */
+.cm-editor .cm-gutters {
+  border-right: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.cm-editor .cm-activeLineGutter {
+  background: var(--bg-tertiary);
+}
+
+/* Active line */
+.cm-editor .cm-activeLine {
+  background: var(--accent-light);
+}
+
+[data-theme="dark"] .cm-editor .cm-activeLine {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Selection */
+.cm-editor .cm-selectionBackground {
+  background: rgba(96, 155, 97, 0.2) !important;
+}
+
+.cm-editor.cm-focused .cm-selectionBackground {
+  background: rgba(96, 155, 97, 0.3) !important;
+}
+
+/* Cursor */
+.cm-editor .cm-cursor {
+  border-left-color: var(--accent);
+}
+
+/* Autocomplete tooltip */
+.cm-tooltip-autocomplete {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-panel) !important;
+  box-shadow: var(--shadow-md) !important;
+  border-radius: var(--radius) !important;
+  font-size: 12px !important;
+}
+
+.cm-tooltip-autocomplete ul li {
+  padding: 4px 8px !important;
+}
+
+.cm-tooltip-autocomplete ul li[aria-selected] {
+  background: var(--accent) !important;
+  color: white !important;
+}
+
+/* Matching brackets */
+.cm-editor .cm-matchingBracket {
+  background: rgba(96, 155, 97, 0.3);
+  outline: 1px solid var(--accent);
+}
+
+/* Search panel */
+.cm-editor .cm-search {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cm-editor .cm-search input {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--bg-input);
+}
+
+.cm-editor .cm-search button {
+  border-radius: var(--radius);
+}
+
+/* Fold gutter */
+.cm-editor .cm-foldGutter span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.cm-editor .cm-foldGutter span:hover {
+  color: var(--accent);
+}
+
+/* Lint markers */
+.cm-editor .cm-lint-marker-error {
+  content: "!";
+}
+
+/* Placeholder */
+.cm-editor .cm-placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Panel label icons */
+.panel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+}
+
+.panel-icon.html {
+  background: #e44d26;
+}
+
+.panel-icon.css {
+  background: #264de4;
+}
+
+.panel-icon.js {
+  background: #f7df1e;
+  color: #000;
+}
+
+.panel-icon.result {
+  background: var(--accent);
+}
