@@ -27,11 +27,18 @@
   --gutter-hover: #999999;
 
   /* Console */
-  --console-bg: #1e1e1e;
-  --console-text: #d4d4d4;
-  --console-warn: #e6db74;
-  --console-error: #f44747;
-  --console-info: #6796e6;
+  --console-bg: #ffffff;
+  --console-text: #1a1a1a;
+  --console-warn: #b8860b;
+  --console-error: #d32f2f;
+  --console-info: #1565c0;
+  --console-border: rgba(0, 0, 0, 0.08);
+  --console-toolbar-bg: var(--bg-tertiary);
+  --console-object: #0451a5;
+  --console-string: #a31515;
+  --console-number: #098658;
+  --console-boolean: #0000ff;
+  --console-null: #808080;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -66,6 +73,19 @@
   --gutter-hover: #666666;
 
   --accent-light: #2a3a2a;
+
+  --console-bg: #1e1e1e;
+  --console-text: #d4d4d4;
+  --console-warn: #e6db74;
+  --console-error: #f44747;
+  --console-info: #6796e6;
+  --console-border: rgba(255, 255, 255, 0.05);
+  --console-toolbar-bg: #1a1a1a;
+  --console-object: #9cdcfe;
+  --console-string: #ce9178;
+  --console-number: #b5cea8;
+  --console-boolean: #569cd6;
+  --console-null: #808080;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);

@@ -13,7 +13,7 @@
 
 .console-entry {
   padding: 2px 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--console-border);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -50,8 +50,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 2px 8px;
-  background: #1a1a1a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--console-toolbar-bg);
+  border-bottom: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -63,7 +63,7 @@
 }
 
 .console-clear-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-tertiary);
 }
 
 .console-count {
@@ -81,21 +81,21 @@
 
 /* Object/Array preview */
 .console-object {
-  color: #9cdcfe;
+  color: var(--console-object);
 }
 
 .console-string {
-  color: #ce9178;
+  color: var(--console-string);
 }
 
 .console-number {
-  color: #b5cea8;
+  color: var(--console-number);
 }
 
 .console-boolean {
-  color: #569cd6;
+  color: var(--console-boolean);
 }
 
 .console-null {
-  color: #808080;
+  color: var(--console-null);
 }
