@@ -22,6 +22,7 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
+import { setLineNumbers } from './editors.js';
 
 let consoleEntries = [];
 
@@ -34,6 +35,7 @@ export function initUI() {
   updateLibraryTags();
   setupWrapModeSelector();
   setupLayoutSelector();
+  setupLineNumbersToggle();
 
   // Listen for custom action events from shortcuts
   document.addEventListener('action-save', () => handleSave());
@@ -272,6 +274,21 @@ function setupLayoutSelector() {
   selector.value = get('layout');
   selector.addEventListener('change', () => {
     setLayout(selector.value);
+  });
+}
+
+// Line numbers toggle
+const LINENUMBERS_KEY = 'jsmess_lineNumbers';
+
+function setupLineNumbersToggle() {
+  const toggle = document.getElementById('line-numbers-toggle');
+  if (!toggle) return;
+
+  toggle.checked = localStorage.getItem(LINENUMBERS_KEY) !== 'false';
+  toggle.addEventListener('change', () => {
+    const show = toggle.checked;
+    localStorage.setItem(LINENUMBERS_KEY, show);
+    setLineNumbers(show);
   });
 }
 

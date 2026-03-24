@@ -31,9 +31,11 @@ export const { javascript } = jsM;
 export const { oneDark } = darkM;
 
 // Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
+// Exports for dynamic line-number toggling via Compartment
+export const lineNumbers = viewM.lineNumbers;
+export const highlightActiveLineGutter = viewM.highlightActiveLineGutter;
+
 export const basicSetup = [
-  viewM.lineNumbers(),
-  viewM.highlightActiveLineGutter(),
   viewM.highlightSpecialChars(),
   commandsM.history(),
   langM.foldGutter(),

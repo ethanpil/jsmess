@@ -2,11 +2,10 @@
 - [ ] Export/Download/Backup all Messes or just the current single one
 - [ ] SCSS / SASS
 - [ ] Typescript
-- [ ] Folding
 - [ ] Mini map
 - [ ] Undo / Redo history
 - [ ] Indent: Tab or [n] Spaces
-- [ ] Show/Hide Line Numbers
+- [x] Show/Hide Line Numbers
 - [ ] Auto Close Brackets
 - [ ] Folding
 - [ ] autocomplete/suggestions

@@ -5,11 +5,22 @@ import {
   EditorState, Compartment,
   html, css, javascript,
   oneDark,
+  lineNumbers, highlightActiveLineGutter,
 } from './cm.js';
 import { setState } from './state.js';
 
+const LINENUMBERS_KEY = 'jsmess_lineNumbers';
 const themeCompartment = new Compartment();
+const lineNumbersCompartment = new Compartment();
 const editors = {};
+
+function getLineNumbersExtensions() {
+  return [lineNumbers(), highlightActiveLineGutter()];
+}
+
+function isLineNumbersEnabled() {
+  return localStorage.getItem(LINENUMBERS_KEY) !== 'false';
+}
 
 function createEditor(container, lang, stateKey, placeholder) {
   const langExtension = lang === 'html' ? html() : lang === 'css' ? css() : javascript();
@@ -25,6 +36,7 @@ function createEditor(container, lang, stateKey, placeholder) {
       doc: '',
       extensions: [
         basicSetup,
+        lineNumbersCompartment.of(isLineNumbersEnabled() ? getLineNumbersExtensions() : []),
         langExtension,
         updateListener,
         themeCompartment.of([]),
@@ -95,6 +107,15 @@ export function setTheme(isDark) {
 export function focusEditor(key) {
   const editor = editors[key];
   if (editor) editor.focus();
+}
+
+export function setLineNumbers(show) {
+  const ext = show ? getLineNumbersExtensions() : [];
+  for (const editor of Object.values(editors)) {
+    editor.dispatch({
+      effects: lineNumbersCompartment.reconfigure(ext),
+    });
+  }
 }
 
 export function refreshEditors() {
