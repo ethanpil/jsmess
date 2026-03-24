@@ -2,21 +2,34 @@
 
 import { get, setState } from './state.js';
 
+const ALGOLIA_APP_ID = 'OFCNCOG2CU';
+const ALGOLIA_API_KEY = 'f54e21fa3a2a0160595bb058179bfb1e';
+const ALGOLIA_URL = `https://${ALGOLIA_APP_ID}-dsn.algolia.net/1/indexes/npm-search/query`;
+
 let searchTimeout = null;
 
 export async function searchPackages(query) {
   if (!query || query.length < 2) return [];
 
   try {
-    const resp = await fetch(
-      `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=10`
-    );
+    const resp = await fetch(ALGOLIA_URL, {
+      method: 'POST',
+      headers: {
+        'x-algolia-application-id': ALGOLIA_APP_ID,
+        'x-algolia-api-key': ALGOLIA_API_KEY,
+      },
+      body: JSON.stringify({
+        query,
+        hitsPerPage: 10,
+        attributesToRetrieve: ['name', 'version', 'description'],
+      }),
+    });
     if (!resp.ok) return [];
     const data = await resp.json();
-    return (data.objects || []).map((obj) => ({
-      name: obj.package.name,
-      version: obj.package.version,
-      description: obj.package.description || '',
+    return (data.hits || []).map((hit) => ({
+      name: hit.name,
+      version: hit.version,
+      description: hit.description || '',
     }));
   } catch (e) {
     console.error('Package search failed:', e);

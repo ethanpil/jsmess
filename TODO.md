@@ -1,4 +1,4 @@
-- [ ] Replace NPM autocomplete and insert system to JSDelivr instead
+- [x] Replace NPM autocomplete and insert system to JSDelivr instead
 - [ ] Export/Download/Backup all Messes or just the current single one
 - [ ] SCSS / SASS
 - [ ] Typescript
