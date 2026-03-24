@@ -34,6 +34,10 @@ export const { oneDark } = darkM;
 // Minimap
 export const { showMinimap } = minimapM;
 
+// History commands
+export const undo = commandsM.undo;
+export const redo = commandsM.redo;
+
 // Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
 // Exports for dynamic line-number toggling via Compartment
 export const lineNumbers = viewM.lineNumbers;

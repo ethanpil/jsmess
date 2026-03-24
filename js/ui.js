@@ -22,7 +22,8 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap } from './editors.js';
+import { setLineNumbers, setMinimap, getActiveEditor } from './editors.js';
+import { undo, redo } from './cm.js';
 
 let consoleEntries = [];
 
@@ -64,6 +65,24 @@ function setupToolbarActions() {
   const formatBtn = document.getElementById('btn-format');
   if (formatBtn) {
     formatBtn.addEventListener('click', handleFormat);
+  }
+
+  // Undo button
+  const undoBtn = document.getElementById('btn-undo');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', () => {
+      const editor = getActiveEditor();
+      if (editor) { undo(editor); editor.focus(); }
+    });
+  }
+
+  // Redo button
+  const redoBtn = document.getElementById('btn-redo');
+  if (redoBtn) {
+    redoBtn.addEventListener('click', () => {
+      const editor = getActiveEditor();
+      if (editor) { redo(editor); editor.focus(); }
+    });
   }
 
   // Save button

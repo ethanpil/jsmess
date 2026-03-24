@@ -18,6 +18,7 @@ const lineNumbersCompartment = new Compartment();
 const minimapCompartment = new Compartment();
 const editors = {};
 const scrollCleanups = {};
+let activeEditor = null;
 
 function getLineNumbersExtensions() {
   return [lineNumbers(), highlightActiveLineGutter()];
@@ -74,6 +75,10 @@ function createEditor(container, lang, stateKey, placeholder) {
 
   editors[stateKey] = view;
 
+  view.dom.addEventListener('focusin', () => {
+    activeEditor = view;
+  });
+
   if (isMinimapEnabled()) {
     attachScrollListener(stateKey, view);
   }
@@ -125,6 +130,10 @@ export function setTheme(isDark) {
       effects: themeCompartment.reconfigure(theme),
     });
   }
+}
+
+export function getActiveEditor() {
+  return activeEditor || editors['html'];
 }
 
 export function focusEditor(key) {
