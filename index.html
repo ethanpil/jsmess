@@ -6,6 +6,12 @@
   <title>JSMess - Code Playground</title>
   <meta name="description" content="JSMess is an open source HTML/CSS/JavaScript code playground. Write, test, and share web code instantly.">
 
+  <!-- Early connection hints — start DNS/TLS before JS discovers the imports -->
+  <link rel="preconnect" href="https://esm.sh" crossorigin>
+  <link rel="preconnect" href="https://jspm.dev" crossorigin>
+  <link rel="dns-prefetch" href="https://esm.sh">
+  <link rel="dns-prefetch" href="https://jspm.dev">
+
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="img/code-scan-svgrepo-com.svg">
 
@@ -14,6 +20,45 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="css/console.css">
+
+  <!-- Preload CodeMirror modules — fetch starts during HTML parse -->
+  <link rel="preload" href="https://esm.sh/@codemirror/state" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/view" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/commands" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/search" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/autocomplete" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/language" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/lint" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/lang-html" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/lang-css" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/lang-javascript" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@codemirror/theme-one-dark" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/@replit/codemirror-minimap" as="fetch" crossorigin>
+  <link rel="preload" href="https://esm.sh/split.js@1.6.5" as="fetch" crossorigin>
+  <link rel="preload" href="https://jspm.dev/sass" as="fetch" crossorigin>
+
+  <!-- Loading skeleton — renders immediately before any JS executes -->
+  <style>
+    #app.loading .panel-body,
+    #app.loading .result-content {
+      background: var(--bg-secondary, #1e1e2e);
+      position: relative;
+      overflow: hidden;
+    }
+    #app.loading .panel-body::after,
+    #app.loading .result-content::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(128,128,128,0.08), transparent);
+      animation: skeleton-shimmer 1.5s infinite;
+    }
+    @keyframes skeleton-shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    #app.loading .toolbar-btn { pointer-events: none; opacity: 0.5; }
+  </style>
 
   <!-- Import Map - only non-CodeMirror deps (CM handled by js/cm.js wrapper) -->
   <script type="importmap">
@@ -29,7 +74,7 @@
   <script type="module" src="js/app.js"></script>
 </head>
 <body>
-  <div id="app">
+  <div id="app" class="loading">
     <!-- Toolbar -->
     <header class="toolbar">
       <div class="toolbar-brand">

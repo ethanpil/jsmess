@@ -3,8 +3,37 @@
 // We import all @codemirror/* packages without pinned versions so esm.sh resolves
 // them to consistent transitive dependency versions (avoiding duplicate @codemirror/state).
 
-const [stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM, darkM, minimapM] =
-  await Promise.all([
+// Deferred initialization — exports are populated by initCM() so the module graph
+// is not blocked by network requests.  All consumers use these via live bindings
+// (ES module `export let`) which update once initCM() resolves.
+
+// Core classes
+export let EditorState, Compartment, EditorView;
+
+// Language support
+export let html, css, javascript;
+
+// Theme
+export let oneDark;
+
+// Minimap
+export let showMinimap;
+
+// History commands
+export let undo, redo;
+
+// Line-number toggling helpers
+export let lineNumbers, highlightActiveLineGutter;
+
+// basicSetup extension array
+export let basicSetup;
+
+let _readyPromise = null;
+
+export function initCM() {
+  if (_readyPromise) return _readyPromise;
+
+  _readyPromise = Promise.all([
     import('https://esm.sh/@codemirror/state'),
     import('https://esm.sh/@codemirror/view'),
     import('https://esm.sh/@codemirror/commands'),
@@ -17,55 +46,59 @@ const [stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM,
     import('https://esm.sh/@codemirror/lang-javascript'),
     import('https://esm.sh/@codemirror/theme-one-dark'),
     import('https://esm.sh/@replit/codemirror-minimap'),
-  ]);
+  ]).then(([stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM, darkM, minimapM]) => {
+    // Core classes
+    EditorState = stateM.EditorState;
+    Compartment = stateM.Compartment;
+    EditorView = viewM.EditorView;
 
-// Core classes
-export const { EditorState, Compartment } = stateM;
-export const { EditorView } = viewM;
+    // Language support
+    html = htmlM.html;
+    css = cssM.css;
+    javascript = jsM.javascript;
 
-// Language support
-export const { html } = htmlM;
-export const { css } = cssM;
-export const { javascript } = jsM;
+    // Theme
+    oneDark = darkM.oneDark;
 
-// Theme
-export const { oneDark } = darkM;
+    // Minimap
+    showMinimap = minimapM.showMinimap;
 
-// Minimap
-export const { showMinimap } = minimapM;
+    // History commands
+    undo = commandsM.undo;
+    redo = commandsM.redo;
 
-// History commands
-export const undo = commandsM.undo;
-export const redo = commandsM.redo;
+    // Line-number toggling
+    lineNumbers = viewM.lineNumbers;
+    highlightActiveLineGutter = viewM.highlightActiveLineGutter;
 
-// Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
-// Exports for dynamic line-number toggling via Compartment
-export const lineNumbers = viewM.lineNumbers;
-export const highlightActiveLineGutter = viewM.highlightActiveLineGutter;
+    // Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
+    basicSetup = [
+      viewM.highlightSpecialChars(),
+      commandsM.history(),
+      langM.foldGutter(),
+      viewM.drawSelection(),
+      viewM.dropCursor(),
+      viewM.rectangularSelection(),
+      viewM.crosshairCursor(),
+      viewM.highlightActiveLine(),
+      stateM.EditorState.allowMultipleSelections.of(true),
+      langM.indentOnInput(),
+      langM.syntaxHighlighting(langM.defaultHighlightStyle, { fallback: true }),
+      langM.bracketMatching(),
+      autoM.closeBrackets(),
+      autoM.autocompletion(),
+      searchM.highlightSelectionMatches(),
+      viewM.keymap.of([
+        ...autoM.closeBracketsKeymap,
+        ...commandsM.defaultKeymap,
+        ...searchM.searchKeymap,
+        ...commandsM.historyKeymap,
+        ...langM.foldKeymap,
+        ...autoM.completionKeymap,
+        ...lintM.lintKeymap,
+      ]),
+    ];
+  });
 
-export const basicSetup = [
-  viewM.highlightSpecialChars(),
-  commandsM.history(),
-  langM.foldGutter(),
-  viewM.drawSelection(),
-  viewM.dropCursor(),
-  viewM.rectangularSelection(),
-  viewM.crosshairCursor(),
-  viewM.highlightActiveLine(),
-  stateM.EditorState.allowMultipleSelections.of(true),
-  langM.indentOnInput(),
-  langM.syntaxHighlighting(langM.defaultHighlightStyle, { fallback: true }),
-  langM.bracketMatching(),
-  autoM.closeBrackets(),
-  autoM.autocompletion(),
-  searchM.highlightSelectionMatches(),
-  viewM.keymap.of([
-    ...autoM.closeBracketsKeymap,
-    ...commandsM.defaultKeymap,
-    ...searchM.searchKeymap,
-    ...commandsM.historyKeymap,
-    ...langM.foldKeymap,
-    ...autoM.completionKeymap,
-    ...lintM.lintKeymap,
-  ]),
-];
+  return _readyPromise;
+}

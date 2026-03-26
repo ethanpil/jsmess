@@ -139,6 +139,16 @@ function wrapJsCode(code, mode) {
   }
 }
 
+export function preloadSass() {
+  if (!sassModule) {
+    import('https://jspm.dev/sass').then(m => {
+      sassModule = m;
+    }).catch(() => {
+      // Silently fail — will retry on first use
+    });
+  }
+}
+
 function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

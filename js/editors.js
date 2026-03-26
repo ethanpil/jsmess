@@ -13,9 +13,9 @@ import { setState } from './state.js';
 const LINENUMBERS_KEY = 'jsmess_lineNumbers';
 const MINIMAP_KEY = 'jsmess_minimap';
 const MINIMAP_HIDE_DELAY = 1500;
-const themeCompartment = new Compartment();
-const lineNumbersCompartment = new Compartment();
-const minimapCompartment = new Compartment();
+let themeCompartment;
+let lineNumbersCompartment;
+let minimapCompartment;
 const editors = {};
 const scrollCleanups = {};
 let activeEditor = null;
@@ -97,6 +97,11 @@ function placeholderExtension(text) {
 }
 
 export function initEditors() {
+  // Create compartments here (after initCM() has populated the Compartment constructor)
+  themeCompartment = new Compartment();
+  lineNumbersCompartment = new Compartment();
+  minimapCompartment = new Compartment();
+
   const htmlContainer = document.querySelector('#html-panel .panel-body');
   const cssContainer = document.querySelector('#css-panel .panel-body');
   const jsContainer = document.querySelector('#js-panel .panel-body');
