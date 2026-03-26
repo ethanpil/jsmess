@@ -34,6 +34,7 @@ export function initUI() {
   setupMessesModal();
   setupLibrarySearch();
   updateLibraryTags();
+  setupStyleTypeSelector();
   setupWrapModeSelector();
   setupLayoutSelector();
   setupLineNumbersToggle();
@@ -43,10 +44,16 @@ export function initUI() {
   document.addEventListener('action-save', () => handleSave());
   document.addEventListener('action-format', () => handleFormat());
 
-  // Update library tags when state changes
+  // Update library tags and style type when state changes
   onStateChange((detail) => {
     if (detail.key === 'libraries' || detail.bulk) {
       updateLibraryTags();
+    }
+    if (detail.key === 'styleType' || detail.bulk) {
+      const styleType = get('styleType') || 'sass';
+      updateCssPanelLabel(styleType);
+      const selector = document.getElementById('style-type');
+      if (selector) selector.value = styleType;
     }
   });
 }
@@ -269,6 +276,32 @@ function toggleSettings() {
   const overlay = document.getElementById('settings-overlay');
   if (drawer) drawer.classList.toggle('open');
   if (overlay) overlay.classList.toggle('open');
+}
+
+// Style type selector
+const STYLETYPE_KEY = 'jsmess_styleType';
+
+function setupStyleTypeSelector() {
+  const selector = document.getElementById('style-type');
+  if (!selector) return;
+
+  const saved = localStorage.getItem(STYLETYPE_KEY) || 'sass';
+  setState('styleType', saved);
+  selector.value = saved;
+  updateCssPanelLabel(saved);
+
+  selector.addEventListener('change', () => {
+    const value = selector.value;
+    localStorage.setItem(STYLETYPE_KEY, value);
+    setState('styleType', value);
+    updateCssPanelLabel(value);
+  });
+}
+
+function updateCssPanelLabel(styleType) {
+  const label = document.getElementById('css-panel-label');
+  if (!label) return;
+  label.innerHTML = `<span class="panel-icon css">{ }</span> ${styleType === 'sass' ? 'SASS' : 'CSS'}`;
 }
 
 // Wrap mode selector

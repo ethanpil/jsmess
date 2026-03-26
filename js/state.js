@@ -8,6 +8,7 @@ const state = {
   id: null,
   wrapMode: 'onLoad', // onLoad, onDomReady, noWrapHead, noWrapBody
   libraries: [], // [{name, version, url}]
+  styleType: 'sass', // css, sass
   layout: 'classic', // classic, left, columns, tabs
   theme: null, // null = system, 'light', 'dark'
 };

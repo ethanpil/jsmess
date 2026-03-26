@@ -118,7 +118,7 @@
         </div>
         <div class="editor-panel" id="css-panel">
           <div class="panel-header">
-            <span class="label"><span class="panel-icon css">{ }</span> CSS</span>
+            <span class="label" id="css-panel-label"><span class="panel-icon css">{ }</span> SASS</span>
           </div>
           <div class="panel-body"></div>
         </div>
@@ -180,6 +180,17 @@
       <div class="settings-row">
         <label for="minimap-toggle">Show MiniMap while scrolling</label>
         <input type="checkbox" id="minimap-toggle">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Style Type</h3>
+      <div class="settings-row">
+        <label>Style Type</label>
+        <select id="style-type">
+          <option value="sass">SASS</option>
+          <option value="css">CSS</option>
+        </select>
       </div>
     </div>
 

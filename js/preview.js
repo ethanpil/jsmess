@@ -2,6 +2,7 @@
 
 import { get } from './state.js';
 
+let sassModule = null;
 const consoleListeners = [];
 
 export function onConsoleMessage(callback) {
@@ -55,15 +56,39 @@ const CONSOLE_CAPTURE_SCRIPT = `
 <\/script>
 `;
 
-export function run() {
+async function compileSass(code) {
+  if (!sassModule) {
+    sassModule = await import('https://jspm.dev/sass');
+  }
+  const sass = sassModule.default || sassModule;
+  const result = sass.compileString(code);
+  return result.css;
+}
+
+export async function run() {
   const iframe = document.getElementById('preview-frame');
   if (!iframe) return;
 
   const htmlCode = get('html');
-  const cssCode = get('css');
+  let cssCode = get('css');
   const jsCode = get('js');
   const wrapMode = get('wrapMode');
+  const styleType = get('styleType');
   const libraries = get('libraries') || [];
+
+  // Compile SASS if needed
+  if (styleType === 'sass' && cssCode.trim()) {
+    try {
+      cssCode = await compileSass(cssCode);
+    } catch (e) {
+      notifyConsole({
+        method: 'error',
+        args: [`SASS compilation error: ${e.message}`],
+        timestamp: Date.now(),
+      });
+      cssCode = '';
+    }
+  }
 
   // Build library script tags
   const libTags = libraries

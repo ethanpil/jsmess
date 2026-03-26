@@ -1,6 +1,7 @@
 // JSMess Format - Prettier standalone (lazy-loaded)
 
 import { getContent, setContent } from './editors.js';
+import { get } from './state.js';
 
 let prettier = null;
 let parserHtml = null;
@@ -28,7 +29,7 @@ export async function formatAll() {
 
   const jobs = [
     formatOne('html', 'html'),
-    formatOne('css', 'css'),
+    get('styleType') !== 'sass' ? formatOne('css', 'css') : Promise.resolve(),
     formatOne('js', 'babel'),
   ];
   await Promise.all(jobs);
@@ -37,6 +38,7 @@ export async function formatAll() {
 export async function formatEditor(key) {
   await loadPrettier();
 
+  if (key === 'css' && get('styleType') === 'sass') return;
   const parser = key === 'html' ? 'html' : key === 'css' ? 'css' : 'babel';
   await formatOne(key, parser);
 }

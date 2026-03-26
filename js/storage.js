@@ -25,6 +25,7 @@ export function saveMess(title) {
     css: get('css'),
     js: get('js'),
     wrapMode: get('wrapMode'),
+    styleType: get('styleType'),
     libraries: get('libraries'),
     updatedAt: Date.now(),
   };
@@ -60,6 +61,7 @@ export function loadMess(id) {
       css: data.css || '',
       js: data.js || '',
       wrapMode: data.wrapMode || 'onLoad',
+      styleType: data.styleType || 'sass',
       libraries: data.libraries || [],
     });
     setContent('html', data.html || '');
@@ -114,6 +116,7 @@ export function exportToHash() {
     c: get('css'),
     j: get('js'),
     w: get('wrapMode'),
+    s: get('styleType'),
     l: get('libraries'),
     t: get('title'),
   };
@@ -150,6 +153,7 @@ export function importFromHash() {
         css: data.c || '',
         js: data.j || '',
         wrapMode: data.w || 'onLoad',
+        styleType: data.s || 'sass',
         libraries: data.l || [],
       });
       setContent('html', data.h || '');
@@ -173,6 +177,7 @@ export function exportToFile() {
     css: get('css'),
     js: get('js'),
     wrapMode: get('wrapMode'),
+    styleType: get('styleType'),
     libraries: get('libraries'),
     exportedAt: new Date().toISOString(),
   };
@@ -199,6 +204,7 @@ export function importFromFile(file) {
           css: data.css || '',
           js: data.js || '',
           wrapMode: data.wrapMode || 'onLoad',
+          styleType: data.styleType || 'sass',
           libraries: data.libraries || [],
         });
         setContent('html', data.html || '');
