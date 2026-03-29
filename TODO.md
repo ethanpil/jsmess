@@ -5,11 +5,10 @@
 - [x] Folding
 - [x] Multiline editing
 - [x] SCSS / SASS Support
+- [x] Indent: Tab or [n] Spaces
 - [ ] Export/Download/Backup all Messes or just the current single one
 - [ ] Export Static Site button to export a ready serve page (or zip with index.html, (compiled?) css, js file)
 - [ ] Typescript
-- [ ] Indent: Tab or [n] Spaces
-- [ ] Auto Close Brackets
 - [ ] autocomplete/suggestions
 - [ ] Additional Layouts
     - [x] Tabs

@@ -53,10 +53,14 @@ async function formatOne(editorKey, parser) {
     else if (parser === 'css') plugins.push(parserCss);
     else if (parser === 'babel') plugins.push(parserBabel);
 
+    const useTabs = localStorage.getItem('jsmess_indentType') === 'tabs';
+    const tabWidth = parseInt(localStorage.getItem('jsmess_indentSize'), 10) || 2;
+
     const formatted = await prettier.format(code, {
       parser,
       plugins,
-      tabWidth: 2,
+      useTabs,
+      tabWidth,
       singleQuote: true,
       semi: true,
       printWidth: 80,

@@ -7,15 +7,20 @@ import {
   oneDark,
   lineNumbers, highlightActiveLineGutter,
   showMinimap,
+  indentUnit,
 } from './cm.js';
 import { setState } from './state.js';
 
 const LINENUMBERS_KEY = 'jsmess_lineNumbers';
 const MINIMAP_KEY = 'jsmess_minimap';
+const INDENT_TYPE_KEY = 'jsmess_indentType';
+const INDENT_SIZE_KEY = 'jsmess_indentSize';
 const MINIMAP_HIDE_DELAY = 1500;
 let themeCompartment;
 let lineNumbersCompartment;
 let minimapCompartment;
+let tabSizeCompartment;
+let indentUnitCompartment;
 const editors = {};
 const scrollCleanups = {};
 let activeEditor = null;
@@ -38,6 +43,14 @@ function getMinimapExtension() {
     displayText: 'blocks',
     showOverlay: 'always',
   }));
+}
+
+function getIndentType() {
+  return localStorage.getItem(INDENT_TYPE_KEY) || 'spaces';
+}
+
+function getIndentSize() {
+  return parseInt(localStorage.getItem(INDENT_SIZE_KEY), 10) || 2;
 }
 
 function createEditor(container, lang, stateKey, placeholder) {
@@ -63,7 +76,8 @@ function createEditor(container, lang, stateKey, placeholder) {
           '&': { height: '100%' },
           '.cm-scroller': { overflow: 'auto' },
         }),
-        EditorState.tabSize.of(2),
+        tabSizeCompartment.of(EditorState.tabSize.of(getIndentSize())),
+        indentUnitCompartment.of(indentUnit.of(getIndentType() === 'tabs' ? '\t' : ' '.repeat(getIndentSize()))),
         EditorView.contentAttributes.of({
           'aria-label': `${lang.toUpperCase()} editor`,
         }),
@@ -101,6 +115,8 @@ export function initEditors() {
   themeCompartment = new Compartment();
   lineNumbersCompartment = new Compartment();
   minimapCompartment = new Compartment();
+  tabSizeCompartment = new Compartment();
+  indentUnitCompartment = new Compartment();
 
   const htmlContainer = document.querySelector('#html-panel .panel-body');
   const cssContainer = document.querySelector('#css-panel .panel-body');
@@ -173,6 +189,18 @@ export function setMinimap(show) {
       });
       detachScrollListener(key);
     }
+  }
+}
+
+export function setIndentation(type, size) {
+  const unit = type === 'tabs' ? '\t' : ' '.repeat(size);
+  for (const editor of Object.values(editors)) {
+    editor.dispatch({
+      effects: [
+        tabSizeCompartment.reconfigure(EditorState.tabSize.of(size)),
+        indentUnitCompartment.reconfigure(indentUnit.of(unit)),
+      ],
+    });
   }
 }
 

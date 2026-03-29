@@ -22,7 +22,7 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap, getActiveEditor } from './editors.js';
+import { setLineNumbers, setMinimap, setIndentation, getActiveEditor } from './editors.js';
 import { undo, redo } from './cm.js';
 
 let consoleEntries = [];
@@ -39,6 +39,7 @@ export function initUI() {
   setupLayoutSelector();
   setupLineNumbersToggle();
   setupMinimapToggle();
+  setupIndentSettings();
 
   // Listen for custom action events from shortcuts
   document.addEventListener('action-save', () => handleSave());
@@ -358,6 +359,41 @@ function setupMinimapToggle() {
     localStorage.setItem(MINIMAP_KEY, show);
     setMinimap(show);
   });
+}
+
+// Indent settings
+const INDENT_TYPE_KEY = 'jsmess_indentType';
+const INDENT_SIZE_KEY = 'jsmess_indentSize';
+
+function setupIndentSettings() {
+  const typeSelector = document.getElementById('indent-type');
+  const sizeSelector = document.getElementById('indent-size');
+  if (!typeSelector || !sizeSelector) return;
+
+  const savedType = localStorage.getItem(INDENT_TYPE_KEY) || 'spaces';
+  const savedSize = localStorage.getItem(INDENT_SIZE_KEY) || '2';
+  typeSelector.value = savedType;
+  sizeSelector.value = savedSize;
+  updateIndentSizeState(typeSelector, sizeSelector);
+
+  typeSelector.addEventListener('change', () => {
+    const type = typeSelector.value;
+    localStorage.setItem(INDENT_TYPE_KEY, type);
+    updateIndentSizeState(typeSelector, sizeSelector);
+    setIndentation(type, parseInt(sizeSelector.value, 10));
+  });
+
+  sizeSelector.addEventListener('change', () => {
+    const size = sizeSelector.value;
+    localStorage.setItem(INDENT_SIZE_KEY, size);
+    setIndentation(typeSelector.value, parseInt(size, 10));
+  });
+}
+
+function updateIndentSizeState(typeSelector, sizeSelector) {
+  const isTabs = typeSelector.value === 'tabs';
+  sizeSelector.disabled = isTabs;
+  sizeSelector.style.opacity = isTabs ? '0.5' : '1';
 }
 
 // Library search

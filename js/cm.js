@@ -25,6 +25,9 @@ export let undo, redo;
 // Line-number toggling helpers
 export let lineNumbers, highlightActiveLineGutter;
 
+// Indentation
+export let indentUnit;
+
 // basicSetup extension array
 export let basicSetup;
 
@@ -71,6 +74,9 @@ export function initCM() {
     lineNumbers = viewM.lineNumbers;
     highlightActiveLineGutter = viewM.highlightActiveLineGutter;
 
+    // Indentation
+    indentUnit = langM.indentUnit;
+
     // Custom basicSetup (equivalent to codemirror meta-package's basicSetup)
     basicSetup = [
       viewM.highlightSpecialChars(),
@@ -89,6 +95,7 @@ export function initCM() {
       autoM.autocompletion(),
       searchM.highlightSelectionMatches(),
       viewM.keymap.of([
+        commandsM.indentWithTab,
         ...autoM.closeBracketsKeymap,
         ...commandsM.defaultKeymap,
         ...searchM.searchKeymap,
