@@ -82,6 +82,21 @@ export function forkMess() {
   return newId;
 }
 
+// Update title in localStorage for an already-saved mess
+export function updateMessTitle(newTitle) {
+  const id = get('id');
+  if (!id) return;
+  const raw = localStorage.getItem(PREFIX + id);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    data.title = newTitle;
+    localStorage.setItem(PREFIX + id, JSON.stringify(data));
+  } catch (e) {
+    // skip corrupt entries
+  }
+}
+
 // Delete mess
 export function deleteMess(id) {
   localStorage.removeItem(PREFIX + id);

@@ -210,7 +210,41 @@
   <div id="settings-overlay" class="settings-overlay"></div>
   <aside id="settings-drawer" class="settings-drawer">
     <div class="settings-section">
-      <h3>Layout</h3>
+      <h3>Settings for this Mess</h3>
+      <div class="settings-row">
+        <label for="mess-title">Mess Title</label>
+        <input type="text" id="mess-title" placeholder="Untitled" value="Untitled">
+      </div>
+      <div class="settings-row">
+        <label>Style Type</label>
+        <select id="style-type">
+          <option value="sass">SASS</option>
+          <option value="css">CSS</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label>Script Loading</label>
+        <select id="wrap-mode">
+          <option value="onLoad">onLoad</option>
+          <option value="onDomReady">onDomReady</option>
+          <option value="noWrapHead">No wrap - in head</option>
+          <option value="noWrapBody">No wrap - in body</option>
+        </select>
+      </div>
+      <div class="settings-subsection">
+        <label>External Libraries</label>
+        <div class="library-search">
+          <input type="text" id="library-search-input" placeholder="Search packages...">
+          <div id="library-search-results" class="library-search-results"></div>
+        </div>
+        <div id="library-tags" class="library-tags"></div>
+      </div>
+    </div>
+
+    <hr class="settings-divider">
+
+    <div class="settings-section">
+      <h3>Global Configuration</h3>
       <div class="settings-row">
         <label>Layout</label>
         <select id="layout-mode">
@@ -219,10 +253,6 @@
           <option value="columns">Columns</option>
         </select>
       </div>
-    </div>
-
-    <div class="settings-section">
-      <h3>Editor</h3>
       <div class="settings-row">
         <label for="line-numbers-toggle">Line numbers</label>
         <input type="checkbox" id="line-numbers-toggle" checked>
@@ -266,39 +296,6 @@
           <span id="font-size-value" class="range-value">13px</span>
         </div>
       </div>
-    </div>
-
-    <div class="settings-section">
-      <h3>Style Type</h3>
-      <div class="settings-row">
-        <label>Style Type</label>
-        <select id="style-type">
-          <option value="sass">SASS</option>
-          <option value="css">CSS</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <h3>Script Loading</h3>
-      <div class="settings-row">
-        <label>Wrap mode</label>
-        <select id="wrap-mode">
-          <option value="onLoad">onLoad</option>
-          <option value="onDomReady">onDomReady</option>
-          <option value="noWrapHead">No wrap - in head</option>
-          <option value="noWrapBody">No wrap - in body</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="settings-section">
-      <h3>External Libraries</h3>
-      <div class="library-search">
-        <input type="text" id="library-search-input" placeholder="Search packages...">
-        <div id="library-search-results" class="library-search-results"></div>
-      </div>
-      <div id="library-tags" class="library-tags"></div>
     </div>
 
     <div class="settings-section">

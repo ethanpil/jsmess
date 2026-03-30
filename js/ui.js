@@ -10,6 +10,7 @@ import {
   listMesses,
   loadMess,
   deleteMess,
+  updateMessTitle,
   exportToHash,
   exportToFile,
   importFromFile,
@@ -32,6 +33,7 @@ export function initUI() {
   setupConsole();
   setupSettingsDrawer();
   setupMessesModal();
+  setupMessTitle();
   setupLibrarySearch();
   updateLibraryTags();
   setupStyleTypeSelector();
@@ -56,6 +58,14 @@ export function initUI() {
       updateCssPanelLabel(styleType);
       const selector = document.getElementById('style-type');
       if (selector) selector.value = styleType;
+    }
+    if (detail.key === 'title' || detail.bulk) {
+      const titleInput = document.getElementById('mess-title');
+      if (titleInput) titleInput.value = get('title') || 'Untitled';
+    }
+    if (detail.key === 'wrapMode' || detail.bulk) {
+      const wrapSelector = document.getElementById('wrap-mode');
+      if (wrapSelector) wrapSelector.value = get('wrapMode') || 'onLoad';
     }
   });
 }
@@ -177,8 +187,7 @@ function setupToolbarActions() {
 }
 
 function handleSave() {
-  const title = get('title') || prompt('Name:', 'Untitled') || 'Untitled';
-  saveMess(title);
+  saveMess(get('title'));
   showToast('Saved!');
 }
 
@@ -278,6 +287,20 @@ function toggleSettings() {
   const overlay = document.getElementById('settings-overlay');
   if (drawer) drawer.classList.toggle('open');
   if (overlay) overlay.classList.toggle('open');
+}
+
+// Mess title input
+function setupMessTitle() {
+  const input = document.getElementById('mess-title');
+  if (!input) return;
+
+  input.value = get('title') || 'Untitled';
+
+  input.addEventListener('input', () => {
+    const value = input.value.trim() || 'Untitled';
+    setState('title', value);
+    updateMessTitle(value);
+  });
 }
 
 // Style type selector

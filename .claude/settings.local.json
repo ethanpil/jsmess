@@ -5,7 +5,9 @@
       "Bash(where node:*)",
       "Bash(where npm:*)",
       "Bash(where python:*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:8090/)",
+      "Bash(curl -v http://localhost:8090/)"
     ]
   }
 }
