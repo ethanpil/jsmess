@@ -15,12 +15,16 @@ const LINENUMBERS_KEY = 'jsmess_lineNumbers';
 const MINIMAP_KEY = 'jsmess_minimap';
 const INDENT_TYPE_KEY = 'jsmess_indentType';
 const INDENT_SIZE_KEY = 'jsmess_indentSize';
+const FONT_KEY = 'jsmess_editorFont';
+const FONT_SIZE_KEY = 'jsmess_fontSize';
+const FONT_FALLBACK = "'SF Mono', 'Consolas', 'Monaco', monospace";
 const MINIMAP_HIDE_DELAY = 1500;
 let themeCompartment;
 let lineNumbersCompartment;
 let minimapCompartment;
 let tabSizeCompartment;
 let indentUnitCompartment;
+let fontCompartment;
 const editors = {};
 const scrollCleanups = {};
 let activeEditor = null;
@@ -53,6 +57,21 @@ function getIndentSize() {
   return parseInt(localStorage.getItem(INDENT_SIZE_KEY), 10) || 2;
 }
 
+function getEditorFont() {
+  return localStorage.getItem(FONT_KEY) || 'Source Code Pro';
+}
+
+function getFontSize() {
+  return parseInt(localStorage.getItem(FONT_SIZE_KEY), 10) || 13;
+}
+
+function getFontTheme(family, size) {
+  return EditorView.theme({
+    '&': { fontSize: size + 'px' },
+    '.cm-scroller': { fontFamily: `'${family}', ${FONT_FALLBACK}` },
+  });
+}
+
 function createEditor(container, lang, stateKey, placeholder) {
   const langExtension = lang === 'html' ? html() : lang === 'css' ? css() : javascript();
 
@@ -78,6 +97,7 @@ function createEditor(container, lang, stateKey, placeholder) {
         }),
         tabSizeCompartment.of(EditorState.tabSize.of(getIndentSize())),
         indentUnitCompartment.of(indentUnit.of(getIndentType() === 'tabs' ? '\t' : ' '.repeat(getIndentSize()))),
+        fontCompartment.of(getFontTheme(getEditorFont(), getFontSize())),
         EditorView.contentAttributes.of({
           'aria-label': `${lang.toUpperCase()} editor`,
         }),
@@ -117,6 +137,7 @@ export function initEditors() {
   minimapCompartment = new Compartment();
   tabSizeCompartment = new Compartment();
   indentUnitCompartment = new Compartment();
+  fontCompartment = new Compartment();
 
   const htmlContainer = document.querySelector('#html-panel .panel-body');
   const cssContainer = document.querySelector('#css-panel .panel-body');
@@ -189,6 +210,15 @@ export function setMinimap(show) {
       });
       detachScrollListener(key);
     }
+  }
+}
+
+export function setEditorFont(family, size) {
+  const theme = getFontTheme(family, size);
+  for (const editor of Object.values(editors)) {
+    editor.dispatch({
+      effects: fontCompartment.reconfigure(theme),
+    });
   }
 }
 

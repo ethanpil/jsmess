@@ -3,12 +3,10 @@
 /* Ensure editor fills its container */
 .cm-editor {
   height: 100%;
-  font-size: 13px;
 }
 
 .cm-editor .cm-scroller {
   overflow: auto;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
   line-height: 1.6;
 }
 

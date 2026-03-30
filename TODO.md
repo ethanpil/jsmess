@@ -6,7 +6,7 @@
 - [x] Multiline editing
 - [x] SCSS / SASS Support
 - [x] Indent: Tab or [n] Spaces
-- [ ] Export Static Site button to export a ready serve page (or zip with index.html, (compiled?) css, js file)
+- [x] Custom editor fonts
 - [ ] Typescript
 - [ ] autocomplete/suggestions
 - [ ] Additional Layouts
@@ -42,37 +42,12 @@ Here is how these features will work:
 
 # Export
     * This Mess -> Export a .jsmess file of this workspace. (As the export button does now.)
-    * Static Site -> Export this site as a .zip file containing a ready to serve website: index.html with style.css and code.js referenced from the index.html. All of the imports are also properly included within index.html so the file can be extracted and served/viewed as is.
+    * Static Site -> Export this site as a .zip file containing a ready to serve website: index.html with style.css (compiled from SASS) and code.js all referenced from the index.html. All of the imports are also properly included within index.html so the file can be extracted and served/viewed as is.
     * Full Backup - Export the entire system state for migration to different instance or for backup. All mess workspaces, revisions, configuration settings, etc.
     
 # Import
     * Single Mess -> Reverse of "Export...This Mess" loads in a .jsmess file into the current workspace, saves it into the system and displays it as the active mess.
     * Full Restore -> Reverse of "Export...Full Backup" loads in an entire system state and replaces all messes, config settings, etc. Explain and confirm with user before overwriting. 
-
-
-
-
-
-- [ ] Custom editor fonts
-
-Add 2 options in the configuration settings for Font settings:
-
-"Editor Font" with a dropdown to load a default font for all editors from Google Fonts:
-
-Google Sans Code
-Source Code Pro
-Fira Code
-IBM Plex Mono
-Inconsolata
-Ubuntu Mono
-Cascadia Code
-Space Mono 
-Overpass Mono
-Jetbrains Mono
-
-"Font Size" - a slider which can go from 8px to 22px
-
-Changing the font and/or size will make it the default for future visits and will dynamically update the fonts in the editors in realtime.  Do we need a spinner or indicator while reformatting?
 
 
 

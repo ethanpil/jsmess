@@ -15,6 +15,11 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="img/code-scan-svgrepo-com.svg">
 
+  <!-- Google Fonts for editor -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cascadia+Code&family=Fira+Code&family=IBM+Plex+Mono&family=Inconsolata&family=JetBrains+Mono&family=Overpass+Mono&family=Source+Code+Pro&family=Space+Mono&family=Ubuntu+Mono&display=swap">
+
   <!-- Styles -->
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -239,6 +244,27 @@
           <option value="2">2 Spaces</option>
           <option value="4">4 Spaces</option>
         </select>
+      </div>
+      <div class="settings-row">
+        <label for="editor-font">Editor Font</label>
+        <select id="editor-font">
+          <option value="Source Code Pro">Source Code Pro</option>
+          <option value="Fira Code">Fira Code</option>
+          <option value="IBM Plex Mono">IBM Plex Mono</option>
+          <option value="Inconsolata">Inconsolata</option>
+          <option value="Ubuntu Mono">Ubuntu Mono</option>
+          <option value="Cascadia Code">Cascadia Code</option>
+          <option value="Space Mono">Space Mono</option>
+          <option value="Overpass Mono">Overpass Mono</option>
+          <option value="JetBrains Mono">JetBrains Mono</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label for="font-size">Font Size</label>
+        <div class="range-control">
+          <input type="range" id="font-size" min="8" max="22" step="1" value="13">
+          <span id="font-size-value" class="range-value">13px</span>
+        </div>
       </div>
     </div>
 

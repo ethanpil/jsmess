@@ -22,7 +22,7 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap, setIndentation, getActiveEditor } from './editors.js';
+import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor } from './editors.js';
 import { undo, redo } from './cm.js';
 
 let consoleEntries = [];
@@ -40,6 +40,7 @@ export function initUI() {
   setupLineNumbersToggle();
   setupMinimapToggle();
   setupIndentSettings();
+  setupFontSettings();
 
   // Listen for custom action events from shortcuts
   document.addEventListener('action-save', () => handleSave());
@@ -394,6 +395,35 @@ function updateIndentSizeState(typeSelector, sizeSelector) {
   const isTabs = typeSelector.value === 'tabs';
   sizeSelector.disabled = isTabs;
   sizeSelector.style.opacity = isTabs ? '0.5' : '1';
+}
+
+// Font settings
+const FONT_KEY = 'jsmess_editorFont';
+const FONT_SIZE_KEY = 'jsmess_fontSize';
+
+function setupFontSettings() {
+  const fontSelector = document.getElementById('editor-font');
+  const sizeSlider = document.getElementById('font-size');
+  const sizeValue = document.getElementById('font-size-value');
+  if (!fontSelector || !sizeSlider) return;
+
+  const savedFont = localStorage.getItem(FONT_KEY) || 'Source Code Pro';
+  const savedSize = localStorage.getItem(FONT_SIZE_KEY) || '13';
+  fontSelector.value = savedFont;
+  sizeSlider.value = savedSize;
+  if (sizeValue) sizeValue.textContent = savedSize + 'px';
+
+  fontSelector.addEventListener('change', () => {
+    localStorage.setItem(FONT_KEY, fontSelector.value);
+    setEditorFont(fontSelector.value, parseInt(sizeSlider.value, 10));
+  });
+
+  sizeSlider.addEventListener('input', () => {
+    const size = sizeSlider.value;
+    if (sizeValue) sizeValue.textContent = size + 'px';
+    localStorage.setItem(FONT_SIZE_KEY, size);
+    setEditorFont(fontSelector.value, parseInt(size, 10));
+  });
 }
 
 // Library search
