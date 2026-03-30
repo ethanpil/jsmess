@@ -178,6 +178,15 @@ export function getActiveEditor() {
   return activeEditor || editors['html'];
 }
 
+export function getActiveEditorKey() {
+  for (const [key, view] of Object.entries(editors)) {
+    if (view === activeEditor) return key;
+  }
+  return 'html';
+}
+
+export { getIndentType, getIndentSize };
+
 export function focusEditor(key) {
   const editor = editors[key];
   if (editor) editor.focus();

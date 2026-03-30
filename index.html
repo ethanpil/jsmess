@@ -93,10 +93,22 @@
           <span class="label-text">Run</span>
         </button>
 
-        <button id="btn-format" class="toolbar-btn" title="Format (Ctrl+Shift+F)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H7M21 6H3M21 14H3M21 18H7"/></svg>
-          <span class="label-text">Tidy</span>
-        </button>
+        <div class="toolbar-dropdown" id="tools-dropdown">
+          <button class="toolbar-btn" id="btn-tools" title="Tools">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span class="label-text">Tools</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="toolbar-dropdown-menu">
+            <button data-action="tidy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H7M21 6H3M21 14H3M21 18H7"/></svg>Tidy</button>
+            <button data-action="tabs-to-spaces"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="3 9 6 12 3 15"/></svg>Tabs to Spaces</button>
+            <button data-action="spaces-to-tabs"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="7 9 4 12 7 15"/></svg>Spaces to Tabs</button>
+            <hr>
+            <button data-action="uppercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L12 4l4 16h4M6 14h12"/></svg>UPPERCASE (Selection)</button>
+            <button data-action="lowercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="5"/><path d="M14 10v10"/></svg>lowercase (Selection)</button>
+            <button data-action="propercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h5L12 6l4 14h5M5 14h10"/></svg>Proper Case (Selection)</button>
+          </div>
+        </div>
 
         <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>

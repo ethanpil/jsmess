@@ -92,6 +92,60 @@
   margin: 0 4px;
 }
 
+/* Toolbar dropdown */
+.toolbar-dropdown {
+  position: relative;
+}
+
+.toolbar-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 200px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  padding: 4px 0;
+}
+
+.toolbar-dropdown-menu.open {
+  display: block;
+}
+
+.toolbar-dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 12px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.toolbar-dropdown-menu button svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.toolbar-dropdown-menu button:hover {
+  background: var(--bg-hover);
+}
+
+.toolbar-dropdown-menu hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 4px 0;
+}
+
 /* Main editor area - Split.js uses flexbox */
 .editor-area {
   display: flex;

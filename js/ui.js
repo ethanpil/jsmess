@@ -23,13 +23,14 @@ import {
   getCdnUrl,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor } from './editors.js';
+import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
 import { undo, redo } from './cm.js';
 
 let consoleEntries = [];
 
 export function initUI() {
   setupToolbarActions();
+  setupToolsDropdown();
   setupConsole();
   setupSettingsDrawer();
   setupMessesModal();
@@ -78,12 +79,6 @@ function setupToolbarActions() {
       clearConsole();
       run();
     });
-  }
-
-  // Format button
-  const formatBtn = document.getElementById('btn-format');
-  if (formatBtn) {
-    formatBtn.addEventListener('click', handleFormat);
   }
 
   // Undo button
@@ -197,6 +192,78 @@ async function handleFormat() {
     showToast('Formatted!');
   } catch (e) {
     showToast('Format failed');
+  }
+}
+
+function setupToolsDropdown() {
+  const dropdown = document.getElementById('tools-dropdown');
+  if (!dropdown) return;
+  const btn = document.getElementById('btn-tools');
+  const menu = dropdown.querySelector('.toolbar-dropdown-menu');
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+  });
+
+  menu.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    menu.classList.remove('open');
+    handleToolAction(action.dataset.action);
+  });
+}
+
+async function handleToolAction(action) {
+  const editor = getActiveEditor();
+  const key = getActiveEditorKey();
+
+  if (action === 'tidy') {
+    await handleFormat();
+    return;
+  }
+
+  if (action === 'tabs-to-spaces') {
+    const size = getIndentSize();
+    const spaces = ' '.repeat(size);
+    setContent(key, getContent(key).replace(/\t/g, spaces));
+    showToast('Tabs converted to spaces');
+    return;
+  }
+
+  if (action === 'spaces-to-tabs') {
+    const size = getIndentSize();
+    const regex = new RegExp(`^( {${size}})+`, 'gm');
+    const text = getContent(key).replace(regex, (match) => '\t'.repeat(match.length / size));
+    setContent(key, text);
+    showToast('Spaces converted to tabs');
+    return;
+  }
+
+  // Selection-based tools
+  const sel = editor.state.selection.main;
+  if (sel.from === sel.to) {
+    showToast('No text selected');
+    return;
+  }
+  const selected = editor.state.sliceDoc(sel.from, sel.to);
+  let result;
+
+  if (action === 'uppercase') {
+    result = selected.toUpperCase();
+  } else if (action === 'lowercase') {
+    result = selected.toLowerCase();
+  } else if (action === 'propercase') {
+    result = selected.replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  if (result !== undefined) {
+    editor.dispatch({ changes: { from: sel.from, to: sel.to, insert: result } });
+    showToast('Done');
   }
 }
 

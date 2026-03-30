@@ -7,8 +7,12 @@
 - [x] SCSS / SASS Support
 - [x] Indent: Tab or [n] Spaces
 - [x] Custom editor fonts
+- [x] Editor Tools
+    - [x] Tidy
+    - [x] Tabs to Spaces
+    - [x] Space to Tabs
+    - [x] Change Case: Upper, lower, Proper
 - [ ] Typescript
-- [ ] autocomplete/suggestions
 - [ ] Additional Layouts
     - [x] Tabs
     - [ ] Hide Console
@@ -79,10 +83,4 @@ When the page is loaded and there has been no mouse movement or keyboard input o
 
 
 
-- [ ] Editor Tools
 
-Add a Tools button that is a dropdown to execute additonal text processing tools on the active editor:
-
-Tidy
-Tabs to Spaces
-Spaces to Tabs
