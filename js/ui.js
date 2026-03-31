@@ -14,6 +14,10 @@ import {
   exportToHash,
   exportToFile,
   importFromFile,
+  exportStaticSite,
+  exportFullBackup,
+  parseBackupFile,
+  restoreFullBackup,
 } from './storage.js';
 import {
   debouncedSearch,
@@ -31,6 +35,8 @@ let consoleEntries = [];
 export function initUI() {
   setupToolbarActions();
   setupToolsDropdown();
+  setupExportDropdown();
+  setupImportDropdown();
   setupConsole();
   setupSettingsDrawer();
   setupMessesModal();
@@ -149,35 +155,6 @@ function setupToolbarActions() {
     messesBtn.addEventListener('click', openMessesModal);
   }
 
-  // Export button
-  const exportBtn = document.getElementById('btn-export');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', exportToFile);
-  }
-
-  // Import button
-  const importBtn = document.getElementById('btn-import');
-  if (importBtn) {
-    importBtn.addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.jsmess';
-      input.onchange = async (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          try {
-            await importFromFile(file);
-            showToast('Imported!');
-            run();
-          } catch (err) {
-            showToast('Import failed: ' + err.message);
-          }
-        }
-      };
-      input.click();
-    });
-  }
-
   updateThemeIcon();
 }
 
@@ -203,6 +180,7 @@ function setupToolsDropdown() {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    closeAllDropdowns();
     menu.classList.toggle('open');
   });
 
@@ -681,4 +659,192 @@ function updateThemeIcon() {
     const icon = btn.querySelector('.theme-icon');
     if (icon) icon.textContent = isDark() ? '☀️' : '🌙';
   }
+}
+
+// Close all open dropdown menus
+function closeAllDropdowns() {
+  document.querySelectorAll('.toolbar-dropdown-menu.open').forEach(m => m.classList.remove('open'));
+}
+
+// Export dropdown
+function setupExportDropdown() {
+  const dropdown = document.getElementById('export-dropdown');
+  if (!dropdown) return;
+  const btn = document.getElementById('btn-export');
+  const menu = dropdown.querySelector('.toolbar-dropdown-menu');
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    menu.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+  });
+
+  menu.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    menu.classList.remove('open');
+    handleExportAction(action.dataset.action);
+  });
+}
+
+async function handleExportAction(action) {
+  if (action === 'export-mess') {
+    exportToFile();
+    return;
+  }
+
+  if (action === 'export-static') {
+    const controller = new AbortController();
+    showProgress('Exporting Static Site...', controller);
+    try {
+      await exportStaticSite(updateProgress, controller.signal);
+      showToast('Static site exported!');
+    } catch (err) {
+      if (err.name !== 'AbortError') showToast('Export failed: ' + err.message);
+    } finally {
+      hideProgress();
+    }
+    return;
+  }
+
+  if (action === 'export-backup') {
+    const controller = new AbortController();
+    showProgress('Exporting Full Backup...', controller);
+    try {
+      exportFullBackup(updateProgress, controller.signal);
+      showToast('Backup exported!');
+    } catch (err) {
+      if (err.name !== 'AbortError') showToast('Backup failed: ' + err.message);
+    } finally {
+      hideProgress();
+    }
+    return;
+  }
+}
+
+// Import dropdown
+function setupImportDropdown() {
+  const dropdown = document.getElementById('import-dropdown');
+  if (!dropdown) return;
+  const btn = document.getElementById('btn-import');
+  const menu = dropdown.querySelector('.toolbar-dropdown-menu');
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllDropdowns();
+    menu.classList.toggle('open');
+  });
+
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+  });
+
+  menu.addEventListener('click', (e) => {
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+    menu.classList.remove('open');
+    handleImportAction(action.dataset.action);
+  });
+}
+
+async function handleImportAction(action) {
+  if (action === 'import-mess') {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.jsmess';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const controller = new AbortController();
+      showProgress('Importing Mess...', controller);
+      try {
+        await importFromFile(file);
+        showToast('Imported!');
+        run();
+      } catch (err) {
+        if (err.name !== 'AbortError') showToast('Import failed: ' + err.message);
+      } finally {
+        hideProgress();
+      }
+    };
+    input.click();
+    return;
+  }
+
+  if (action === 'import-restore') {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const backupData = await parseBackupFile(file);
+        const count = backupData.messes.length;
+        const configCount = Object.keys(backupData.config || {}).length;
+        const confirmed = confirm(
+          `This will restore ${count} mess(es) and ${configCount} config setting(s).\n\n` +
+          `Existing messes with the same IDs will be overwritten.\n\n` +
+          `Continue?`
+        );
+        if (!confirmed) return;
+
+        const controller = new AbortController();
+        showProgress('Restoring Backup...', controller);
+        try {
+          restoreFullBackup(backupData, updateProgress, controller.signal);
+          showToast(`Restored ${count} mess(es)!`);
+        } catch (err) {
+          if (err.name !== 'AbortError') showToast('Restore failed: ' + err.message);
+        } finally {
+          hideProgress();
+        }
+      } catch (err) {
+        showToast('Invalid backup file: ' + err.message);
+      }
+    };
+    input.click();
+    return;
+  }
+}
+
+// Progress overlay
+function showProgress(title, controller) {
+  const overlay = document.getElementById('progress-overlay');
+  const titleEl = document.getElementById('progress-title');
+  const bar = document.getElementById('progress-bar');
+  const message = document.getElementById('progress-message');
+  const cancelBtn = document.getElementById('progress-cancel');
+
+  if (titleEl) titleEl.textContent = title;
+  if (bar) bar.style.width = '0%';
+  if (message) message.textContent = 'Preparing...';
+  if (overlay) overlay.classList.remove('hidden');
+
+  const onCancel = () => {
+    controller.abort();
+    hideProgress();
+    showToast('Cancelled');
+  };
+  if (cancelBtn) {
+    cancelBtn.removeEventListener('click', cancelBtn._handler);
+    cancelBtn._handler = onCancel;
+    cancelBtn.addEventListener('click', onCancel);
+  }
+}
+
+function updateProgress(msg, pct) {
+  const bar = document.getElementById('progress-bar');
+  const message = document.getElementById('progress-message');
+  if (bar) bar.style.width = pct + '%';
+  if (message) message.textContent = msg;
+}
+
+function hideProgress() {
+  const overlay = document.getElementById('progress-overlay');
+  if (overlay) overlay.classList.add('hidden');
 }

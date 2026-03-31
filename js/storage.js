@@ -3,6 +3,7 @@
 import LZString from 'lz-string';
 import { getState, setMultiple, get } from './state.js';
 import { setContent } from './editors.js';
+import { compileSass, wrapJsCode } from './preview.js';
 
 const PREFIX = 'jsmess_mess_';
 
@@ -233,4 +234,171 @@ export function importFromFile(file) {
     reader.onerror = reject;
     reader.readAsText(file);
   });
+}
+
+// Export as static site ZIP
+export async function exportStaticSite(onProgress, signal) {
+  onProgress('Compiling styles...', 10);
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  const styleType = get('styleType');
+  let cssCode = get('css');
+  if (styleType === 'sass' && cssCode.trim()) {
+    cssCode = await compileSass(cssCode);
+  }
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Preparing JavaScript...', 30);
+
+  const jsCode = get('js');
+  const wrapMode = get('wrapMode');
+  const wrappedJs = wrapJsCode(jsCode, wrapMode);
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Building HTML...', 50);
+
+  const libraries = get('libraries') || [];
+  const libTags = libraries
+    .map(lib => `  <script src="${lib.url}"><\/script>`)
+    .join('\n');
+
+  let headScript = '';
+  let bodyScript = '';
+  if (wrapMode === 'noWrapHead') {
+    headScript = '  <script src="script.js"><\/script>';
+  } else {
+    bodyScript = '  <script src="script.js"><\/script>';
+  }
+
+  const title = get('title') || 'Untitled';
+  const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <link rel="stylesheet" href="style.css">
+${libTags}
+${headScript}
+</head>
+<body>
+${get('html')}
+${bodyScript}
+</body>
+</html>`;
+
+  const jsFileContent = (wrapMode === 'noWrapHead') ? jsCode : wrappedJs;
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Loading ZIP library...', 60);
+
+  const JSZip = (await import('jszip')).default;
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Creating ZIP...', 75);
+
+  const zip = new JSZip();
+  zip.file('index.html', htmlContent);
+  zip.file('style.css', cssCode);
+  zip.file('script.js', jsFileContent);
+
+  onProgress('Compressing...', 85);
+  const blob = await zip.generateAsync({ type: 'blob' });
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Done!', 100);
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title}.zip`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Export full backup of all messes and config
+export function exportFullBackup(onProgress, signal) {
+  onProgress('Gathering data...', 20);
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  const backup = {
+    version: 1,
+    type: 'jsmess-backup',
+    exportedAt: new Date().toISOString(),
+    messes: [],
+    config: {},
+  };
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('jsmess_')) continue;
+
+    if (key.startsWith(PREFIX)) {
+      try {
+        backup.messes.push(JSON.parse(localStorage.getItem(key)));
+      } catch (e) { /* skip corrupt */ }
+    } else {
+      backup.config[key] = localStorage.getItem(key);
+    }
+  }
+
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  onProgress('Creating file...', 80);
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: 'application/json' }
+  );
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `jsmess-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  onProgress('Done!', 100);
+}
+
+// Parse a backup file and validate its structure
+export function parseBackupFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (data.type !== 'jsmess-backup' || !Array.isArray(data.messes)) {
+          reject(new Error('Not a valid JSMess backup file'));
+          return;
+        }
+        resolve(data);
+      } catch (e) {
+        reject(new Error('Invalid JSON'));
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
+// Restore a full backup into localStorage
+export function restoreFullBackup(backupData, onProgress, signal) {
+  onProgress('Restoring messes...', 20);
+
+  const total = backupData.messes.length;
+  for (let i = 0; i < total; i++) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const mess = backupData.messes[i];
+    localStorage.setItem(PREFIX + mess.id, JSON.stringify(mess));
+    onProgress(`Restoring mess ${i + 1} of ${total}...`, 20 + (i / total) * 60);
+  }
+
+  onProgress('Restoring config...', 85);
+  if (backupData.config) {
+    for (const [key, value] of Object.entries(backupData.config)) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+      localStorage.setItem(key, value);
+    }
+  }
+
+  onProgress('Done!', 100);
 }

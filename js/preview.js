@@ -56,7 +56,7 @@ const CONSOLE_CAPTURE_SCRIPT = `
 <\/script>
 `;
 
-async function compileSass(code) {
+export async function compileSass(code) {
   if (!sassModule) {
     sassModule = await import('https://jspm.dev/sass');
   }
@@ -125,7 +125,7 @@ export async function run() {
   iframe.srcdoc = doc;
 }
 
-function wrapJsCode(code, mode) {
+export function wrapJsCode(code, mode) {
   switch (mode) {
     case 'onLoad':
       return `window.addEventListener('load', function() {\n${code}\n});`;

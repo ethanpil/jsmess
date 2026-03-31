@@ -12,6 +12,11 @@
     - [x] Tabs to Spaces
     - [x] Space to Tabs
     - [x] Change Case: Upper, lower, Proper
+- [x] Custom name / Rename a mess
+- [x] Fully featured Export/Import System
+    - [x] Single Mess 
+    - [x] Static Site
+    - [x] Full Backup / Restore     
 - [ ] Typescript
 - [ ] Additional Layouts
     - [x] Tabs
@@ -20,41 +25,8 @@
 - [ ] Auto Save
 - [ ] Auto Run
 - [ ] Save to server. (Github via token?) (POST to HTTP Server?)
-- [ ] Set expiration per Mess. (Add an autoclean? or too dangerours)
-- [ ]  wa-sqlite storage - Implement wa-sqlite for storage in browser via the OPFSCoopSyncVFS configuration.
-- [ ] Custom name / Rename a mess
-
-
-
-- [ ] Fully featured Export/Import System
-    - [x] Single Mess
-    - [ ] Export Static Site (ready to publish)
-    - [ ] Full Backup
-    
-Change the "Export" button to a dropdown with these options:
-
-* This Mess
-* Static Site
-* Full Backup
-
-Change the "Import" button to a dropdown with these options:
-
-* Single Mess
-* Full Restore
-
-Here is how these features will work:
-
-# Export
-    * This Mess -> Export a .jsmess file of this workspace. (As the export button does now.)
-    * Static Site -> Export this site as a .zip file containing a ready to serve website: index.html with style.css (compiled from SASS) and code.js all referenced from the index.html. All of the imports are also properly included within index.html so the file can be extracted and served/viewed as is.
-    * Full Backup - Export the entire system state for migration to different instance or for backup. All mess workspaces, revisions, configuration settings, etc.
-    
-# Import
-    * Single Mess -> Reverse of "Export...This Mess" loads in a .jsmess file into the current workspace, saves it into the system and displays it as the active mess.
-    * Full Restore -> Reverse of "Export...Full Backup" loads in an entire system state and replaces all messes, config settings, etc. Explain and confirm with user before overwriting. 
-
-
-
+- [ ] Convert to some sort of sqlite based storage (wa-sqlite via the OPFSCoopSyncVFS?)
+    - [ ] Sync to external server
 
 - [ ] Mess auto-expiration
 
