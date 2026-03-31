@@ -450,6 +450,45 @@
   margin-bottom: 6px;
 }
 
+.cleanup-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  margin-bottom: 12px;
+}
+
+.cleanup-info {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.cleanup-btn {
+  padding: 3px 10px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.cleanup-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.mess-item-expiry {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: 6px;
+}
+
+.mess-item-expiry.expired {
+  color: var(--console-error);
+}
+
 .range-control {
   flex: 1;
   display: flex;

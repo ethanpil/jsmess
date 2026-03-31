@@ -18,6 +18,8 @@ import {
   exportFullBackup,
   parseBackupFile,
   restoreFullBackup,
+  cleanupExpiredMesses,
+  getLastCleanupDate,
 } from './storage.js';
 import {
   debouncedSearch,
@@ -45,6 +47,8 @@ export function initUI() {
   updateLibraryTags();
   setupStyleTypeSelector();
   setupWrapModeSelector();
+  setupExpirationSelector();
+  setupCleanupButton();
   setupLayoutSelector();
   setupLineNumbersToggle();
   setupMinimapToggle();
@@ -73,6 +77,10 @@ export function initUI() {
     if (detail.key === 'wrapMode' || detail.bulk) {
       const wrapSelector = document.getElementById('wrap-mode');
       if (wrapSelector) wrapSelector.value = get('wrapMode') || 'onLoad';
+    }
+    if (detail.key === 'expiration' || detail.bulk) {
+      const expSelector = document.getElementById('mess-expiration');
+      if (expSelector) expSelector.value = String(get('expiration') || 0);
     }
   });
 }
@@ -385,6 +393,41 @@ function setupWrapModeSelector() {
   });
 }
 
+// Expiration selector
+function setupExpirationSelector() {
+  const selector = document.getElementById('mess-expiration');
+  if (!selector) return;
+
+  selector.value = String(get('expiration') || 0);
+  selector.addEventListener('change', () => {
+    setState('expiration', Number(selector.value));
+  });
+}
+
+// Cleanup button
+function setupCleanupButton() {
+  updateLastCleanupDisplay();
+  const btn = document.getElementById('btn-cleanup');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const result = cleanupExpiredMesses();
+    updateLastCleanupDisplay();
+    if (result.removed > 0) {
+      showToast(`Cleaned up ${result.removed} expired mess(es)`);
+    } else {
+      showToast('No expired messes found');
+    }
+  });
+}
+
+export function updateLastCleanupDisplay() {
+  const el = document.getElementById('last-cleanup');
+  if (!el) return;
+  const date = getLastCleanupDate();
+  el.textContent = date ? `Last Cleanup: ${date}` : 'Last Cleanup: Never';
+}
+
 // Layout selector
 function setupLayoutSelector() {
   const selector = document.getElementById('layout-mode');
@@ -593,10 +636,22 @@ function openMessesModal() {
     const item = document.createElement('div');
     item.className = 'mess-item';
     const date = f.updatedAt ? new Date(f.updatedAt).toLocaleDateString() : '';
+    let expiryLabel = '';
+    if (f.expiration && f.expiration > 0 && f.updatedAt) {
+      const expiresAt = f.updatedAt + f.expiration * 86400000;
+      const daysLeft = Math.ceil((expiresAt - Date.now()) / 86400000);
+      if (daysLeft <= 0) {
+        expiryLabel = '<span class="mess-item-expiry expired">Expired</span>';
+      } else if (daysLeft === 1) {
+        expiryLabel = '<span class="mess-item-expiry">Expires tomorrow</span>';
+      } else {
+        expiryLabel = `<span class="mess-item-expiry">Expires in ${daysLeft} days</span>`;
+      }
+    }
     item.innerHTML = `
       <div>
         <div class="mess-item-title">${escapeHtml(f.title)}</div>
-        <div class="mess-item-date">${date}</div>
+        <div class="mess-item-date">${date} ${expiryLabel}</div>
       </div>
       <div class="mess-item-actions">
         <button class="load" title="Load">Open</button>
@@ -625,7 +680,7 @@ function closeMessesModal() {
 }
 
 // Toast notification
-function showToast(message) {
+export function showToast(message) {
   let toast = document.getElementById('toast');
   if (!toast) {
     toast = document.createElement('div');

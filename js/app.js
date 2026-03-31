@@ -5,8 +5,8 @@ import { initEditors } from './editors.js';
 import { initLayout } from './layout.js';
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './themes.js';
-import { initUI } from './ui.js';
-import { importFromHash } from './storage.js';
+import { initUI, showToast, updateLastCleanupDisplay } from './ui.js';
+import { importFromHash, cleanupExpiredMesses, getLastCleanupDate } from './storage.js';
 import { run, preloadSass } from './preview.js';
 
 let initialized = false;
@@ -44,7 +44,31 @@ async function init() {
     run();
   });
 
+  // Idle auto-cleanup: run once per day after 30s of inactivity
+  initIdleCleanup();
+
   console.log('JSMess initialized');
+}
+
+function initIdleCleanup() {
+  let lastActivity = Date.now();
+  const onActivity = () => { lastActivity = Date.now(); };
+
+  window.addEventListener('mousemove', onActivity, { passive: true });
+  window.addEventListener('keydown', onActivity, { passive: true });
+  window.addEventListener('scroll', onActivity, { passive: true });
+
+  setInterval(() => {
+    if (Date.now() - lastActivity < 30000) return;
+    const today = new Date().toISOString().slice(0, 10);
+    if (getLastCleanupDate() === today) return;
+
+    const result = cleanupExpiredMesses();
+    updateLastCleanupDisplay();
+    if (result.removed > 0) {
+      showToast(`Auto-cleaned ${result.removed} expired mess(es)`);
+    }
+  }, 5000);
 }
 
 // Wait for DOM

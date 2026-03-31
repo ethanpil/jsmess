@@ -7,7 +7,19 @@
       "Bash(where python:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(curl -s http://localhost:8090/)",
-      "Bash(curl -v http://localhost:8090/)"
+      "Bash(curl -v http://localhost:8090/)",
+      "Bash(node -c js/state.js)",
+      "Bash(node -c js/storage.js)",
+      "Bash(node -c js/app.js)",
+      "Bash(node -c js/ui.js)",
+      "Bash(where.exe node:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8090/)",
+      "Bash(curl -s -m 5 http://localhost:8090/)",
+      "Bash(curl.exe -s -m 5 http://localhost:8090/)",
+      "Bash(powershell -Command \"\\(Invoke-WebRequest -Uri ''http://localhost:8090/'' -UseBasicParsing -TimeoutSec 5\\).StatusCode\")",
+      "Bash(powershell -Command \"\\(Invoke-WebRequest -Uri ''http://localhost:8090/'' -UseBasicParsing -TimeoutSec 10\\).StatusCode\")",
+      "Bash(powershell -Command \"\\(Get-Content index.html | Measure-Object -Line\\).Lines\")",
+      "Bash(python -c \"import http.server; print\\(''python http.server OK''\\)\")"
     ]
   }
 }

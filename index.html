@@ -261,6 +261,21 @@
           <option value="noWrapBody">No wrap - in body</option>
         </select>
       </div>
+      <div class="settings-row">
+        <label>Expiration</label>
+        <select id="mess-expiration">
+          <option value="0">Keep Forever</option>
+          <option value="1">1 Day</option>
+          <option value="10">10 Days</option>
+          <option value="30">1 Month</option>
+          <option value="180">6 Months</option>
+          <option value="365">1 Year</option>
+        </select>
+      </div>
+      <div class="settings-subsection cleanup-section">
+        <small class="cleanup-info" id="last-cleanup">Last Cleanup: Never</small>
+        <button class="cleanup-btn" id="btn-cleanup">Clean Up Now</button>
+      </div>
       <div class="settings-subsection">
         <label>External Libraries</label>
         <div class="library-search">

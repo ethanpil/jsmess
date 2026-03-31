@@ -28,6 +28,7 @@ export function saveMess(title) {
     wrapMode: get('wrapMode'),
     styleType: get('styleType'),
     libraries: get('libraries'),
+    expiration: get('expiration') || 0,
     updatedAt: Date.now(),
   };
 
@@ -64,6 +65,7 @@ export function loadMess(id) {
       wrapMode: data.wrapMode || 'onLoad',
       styleType: data.styleType || 'sass',
       libraries: data.libraries || [],
+      expiration: data.expiration || 0,
     });
     setContent('html', data.html || '');
     setContent('css', data.css || '');
@@ -116,6 +118,7 @@ export function listMesses() {
           title: data.title,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
+          expiration: data.expiration || 0,
         });
       } catch (e) {
         // skip corrupt entries
@@ -135,6 +138,7 @@ export function exportToHash() {
     s: get('styleType'),
     l: get('libraries'),
     t: get('title'),
+    e: get('expiration') || 0,
   };
   const json = JSON.stringify(data);
   const compressed = LZString.compressToEncodedURIComponent(json);
@@ -171,6 +175,7 @@ export function importFromHash() {
         wrapMode: data.w || 'onLoad',
         styleType: data.s || 'sass',
         libraries: data.l || [],
+        expiration: data.e || 0,
       });
       setContent('html', data.h || '');
       setContent('css', data.c || '');
@@ -195,6 +200,7 @@ export function exportToFile() {
     wrapMode: get('wrapMode'),
     styleType: get('styleType'),
     libraries: get('libraries'),
+    expiration: get('expiration') || 0,
     exportedAt: new Date().toISOString(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -222,6 +228,7 @@ export function importFromFile(file) {
           wrapMode: data.wrapMode || 'onLoad',
           styleType: data.styleType || 'sass',
           libraries: data.libraries || [],
+          expiration: data.expiration || 0,
         });
         setContent('html', data.html || '');
         setContent('css', data.css || '');
@@ -401,4 +408,36 @@ export function restoreFullBackup(backupData, onProgress, signal) {
   }
 
   onProgress('Done!', 100);
+}
+
+// Clean up expired messes from localStorage
+export function cleanupExpiredMesses() {
+  const now = Date.now();
+  const removed = [];
+
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(PREFIX)) continue;
+
+    try {
+      const data = JSON.parse(localStorage.getItem(key));
+      if (!data.expiration || data.expiration === 0) continue;
+
+      const expiresAt = (data.updatedAt || 0) + data.expiration * 86400000;
+      if (now >= expiresAt) {
+        removed.push(data.title || data.id);
+        localStorage.removeItem(key);
+      }
+    } catch (e) {
+      // skip corrupt entries
+    }
+  }
+
+  localStorage.setItem('jsmess_lastCleanup', new Date().toISOString().slice(0, 10));
+  return { removed: removed.length, names: removed };
+}
+
+// Get the last cleanup date string (YYYY-MM-DD) or null
+export function getLastCleanupDate() {
+  return localStorage.getItem('jsmess_lastCleanup') || null;
 }
