@@ -30,27 +30,26 @@
 
 - [ ] Mess auto-expiration
 
-The "Save" button should retain existing functionality on click: save a revision of the current mess and update the URL to point to this revision.
-
-Hovering over the save button should present a small menu under the Save button which sets the "Expiration" for the mess. 
+Add a new option "Expiration" in the config page section for "Settings for this Mess"
 
 1 day
 10 days
 1 month
 6 months
 1 year
-Keep forever
+Keep Forever  <- (Default for every new Mess)
 
+Also include in small text: 
 Last Cleanup: [Date]
-Clean Up Now
 
+And a button:
+Clean Up Now  
 
-Clicking "Clean Up Now" will manually run the cleanup script.
+Clicking "Clean Up Now" will manually run the cleanup script and remove all expired messes.
 
 Default setting is "Keep Forever"
 
-Otherwise the setting will determine how long after the last save date the Fiddle will auto-erase.
-When the page is loaded and there has been no mouse movement or keyboard input or scroll for more than 30 seconds, and the cleanup script has not run Today, then run the cleanup script automatically, to erase all expired Mess from the localstorage. Do we need a spinner or indicator while cleaning up?
+Otherwise the setting will determine how long after the last save date the Fiddle will auto-erase. When the page is loaded and there has been no mouse movement or keyboard input or scroll for more than 30 seconds, and the cleanup script has not run Today, then run the cleanup script automatically, to erase all expired Mess from the localstorage. In the list of "My Messes" also indicate if the Mess has an expiration date. Ensure the backup/restore/export/import system fully supports this new setting. Do we need a spinner or indicator while cleaning up?
 
 
 
