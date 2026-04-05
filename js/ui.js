@@ -22,11 +22,10 @@ import {
   getLastCleanupDate,
 } from './storage.js';
 import {
-  debouncedSearch,
   addLibrary,
   removeLibrary,
-  getPackageVersions,
-  getCdnUrl,
+  setLibraryType,
+  moveLibrary,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
 import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
@@ -43,8 +42,8 @@ export function initUI() {
   setupSettingsDrawer();
   setupMessesModal();
   setupMessTitle();
-  setupLibrarySearch();
-  updateLibraryTags();
+  setupLibraryInput();
+  updateLibraryList();
   setupStyleTypeSelector();
   setupWrapModeSelector();
   setupExpirationSelector();
@@ -62,7 +61,7 @@ export function initUI() {
   // Update library tags and style type when state changes
   onStateChange((detail) => {
     if (detail.key === 'libraries' || detail.bulk) {
-      updateLibraryTags();
+      updateLibraryList();
     }
     if (detail.key === 'styleType' || detail.bulk) {
       const styleType = get('styleType') || 'sass';
@@ -537,68 +536,82 @@ function setupFontSettings() {
   });
 }
 
-// Library search
-function setupLibrarySearch() {
-  const input = document.getElementById('library-search-input');
-  const results = document.getElementById('library-search-results');
-  if (!input || !results) return;
+// Library URL input
+function setupLibraryInput() {
+  const input = document.getElementById('library-url-input');
+  const addBtn = document.getElementById('library-add-btn');
+  if (!input || !addBtn) return;
 
-  input.addEventListener('input', () => {
-    const query = input.value.trim();
-    if (query.length < 2) {
-      results.classList.remove('open');
-      return;
+  const doAdd = () => {
+    const url = input.value.trim();
+    if (url) {
+      addLibrary(url);
+      input.value = '';
     }
+  };
 
-    debouncedSearch(query, (packages) => {
-      results.innerHTML = '';
-      if (packages.length === 0) {
-        results.classList.remove('open');
-        return;
-      }
-
-      for (const pkg of packages) {
-        const div = document.createElement('div');
-        div.className = 'library-result';
-        div.innerHTML = `
-          <div class="library-result-name">${escapeHtml(pkg.name)}@${escapeHtml(pkg.version)}</div>
-          <div class="library-result-desc">${escapeHtml(pkg.description)}</div>
-        `;
-        div.addEventListener('click', async () => {
-          input.value = '';
-          results.classList.remove('open');
-          await addLibrary(pkg.name, pkg.version, getCdnUrl(pkg.name, pkg.version));
-        });
-        results.appendChild(div);
-      }
-      results.classList.add('open');
-    });
-  });
-
-  // Close results on click outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.library-search')) {
-      results.classList.remove('open');
-    }
+  addBtn.addEventListener('click', doAdd);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doAdd();
   });
 }
 
-function updateLibraryTags() {
-  const container = document.getElementById('library-tags');
+function filenameFromUrl(url) {
+  try {
+    const path = new URL(url, 'https://x/').pathname;
+    return path.split('/').pop() || url;
+  } catch (_) {
+    return url;
+  }
+}
+
+function updateLibraryList() {
+  const container = document.getElementById('library-list');
   if (!container) return;
 
   const libs = get('libraries') || [];
   container.innerHTML = '';
 
   for (let i = 0; i < libs.length; i++) {
-    const tag = document.createElement('span');
-    tag.className = 'library-tag';
-    tag.innerHTML = `${escapeHtml(libs[i].name)}@${escapeHtml(libs[i].version)}
-      <button data-index="${i}" title="Remove">&times;</button>`;
-    tag.querySelector('button').addEventListener('click', () => {
-      removeLibrary(i);
-    });
-    container.appendChild(tag);
+    const lib = libs[i];
+    const row = document.createElement('div');
+    row.className = 'library-item';
+
+    const label = document.createElement('span');
+    label.className = 'library-item-url';
+    label.textContent = filenameFromUrl(lib.url);
+    label.title = lib.url;
+
+    const typeSelect = document.createElement('select');
+    typeSelect.className = 'library-type-select';
+    typeSelect.innerHTML = '<option value="js">JS</option><option value="css">CSS</option>';
+    typeSelect.value = lib.type || 'js';
+    typeSelect.addEventListener('change', () => setLibraryType(i, typeSelect.value));
+
+    const actions = document.createElement('span');
+    actions.className = 'library-item-actions';
+
+    const upBtn = document.createElement('button');
+    upBtn.textContent = '\u2191';
+    upBtn.title = 'Move up';
+    upBtn.disabled = i === 0;
+    upBtn.addEventListener('click', () => moveLibrary(i, i - 1));
+
+    const downBtn = document.createElement('button');
+    downBtn.textContent = '\u2193';
+    downBtn.title = 'Move down';
+    downBtn.disabled = i === libs.length - 1;
+    downBtn.addEventListener('click', () => moveLibrary(i, i + 1));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'library-delete-btn';
+    delBtn.textContent = '\u00d7';
+    delBtn.title = 'Remove';
+    delBtn.addEventListener('click', () => removeLibrary(i));
+
+    actions.append(upBtn, downBtn, delBtn);
+    row.append(label, typeSelect, actions);
+    container.appendChild(row);
   }
 }
 

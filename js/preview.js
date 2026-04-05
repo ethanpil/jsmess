@@ -1,7 +1,6 @@
 // JSMess Preview - iframe srcdoc + console capture
 
 import { get } from './state.js';
-import { inferTypeFromUrl } from './libraries.js';
 
 let sassModule = null;
 const consoleListeners = [];
@@ -94,9 +93,8 @@ export async function run() {
   // Build library tags — CSS as <link>, JS as <script>
   const libTags = libraries
     .map((lib) => {
-      const type = lib.type || inferTypeFromUrl(lib.url) || 'js';
       const safeUrl = escapeHtml(lib.url);
-      return type === 'css'
+      return lib.type === 'css'
         ? `<link rel="stylesheet" href="${safeUrl}">`
         : `<script src="${safeUrl}"><\/script>`;
     })
