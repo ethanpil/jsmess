@@ -564,10 +564,10 @@ function setupLibrarySearch() {
           <div class="library-result-name">${escapeHtml(pkg.name)}@${escapeHtml(pkg.version)}</div>
           <div class="library-result-desc">${escapeHtml(pkg.description)}</div>
         `;
-        div.addEventListener('click', () => {
-          addLibrary(pkg.name, pkg.version, getCdnUrl(pkg.name, pkg.version));
+        div.addEventListener('click', async () => {
           input.value = '';
           results.classList.remove('open');
+          await addLibrary(pkg.name, pkg.version, getCdnUrl(pkg.name, pkg.version));
         });
         results.appendChild(div);
       }

@@ -53,11 +53,50 @@ export function getCdnUrl(name, version) {
   return `https://cdn.jsdelivr.net/npm/${name}@${version}`;
 }
 
-export function addLibrary(name, version, url) {
+// Synchronous type inference from URL extension only. Returns 'js', 'css', or null.
+export function inferTypeFromUrl(url) {
+  try {
+    const path = new URL(url, 'https://x/').pathname.toLowerCase();
+    const ext = path.slice(path.lastIndexOf('.'));
+    if (ext === '.css') return 'css';
+    if (ext === '.scss' || ext === '.sass') return 'css';
+    if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'js';
+  } catch (_) {
+    // ignore
+  }
+  return null;
+}
+
+// Resolve a library URL to 'js' or 'css'. Tries extension first, then a HEAD
+// request to inspect Content-Type and final redirected URL. Defaults to 'js'.
+export async function resolveLibraryType(url) {
+  const fromExt = inferTypeFromUrl(url);
+  if (fromExt) return fromExt;
+
+  try {
+    const resp = await fetch(url, { method: 'HEAD', redirect: 'follow' });
+    const ct = (resp.headers.get('content-type') || '').toLowerCase();
+    if (ct.startsWith('text/css')) return 'css';
+    if (ct.includes('javascript') || ct.includes('ecmascript')) return 'js';
+    if (ct.includes('scss') || ct.includes('sass')) return 'css';
+
+    // Inspect final redirected URL's extension
+    const fromFinal = inferTypeFromUrl(resp.url || url);
+    if (fromFinal) return fromFinal;
+  } catch (_) {
+    // network failure — fall through
+  }
+
+  return 'js';
+}
+
+export async function addLibrary(name, version, url) {
   const libs = [...(get('libraries') || [])];
   // Don't add duplicates
   if (libs.some((l) => l.name === name && l.version === version)) return;
-  libs.push({ name, version, url: url || getCdnUrl(name, version) });
+  const finalUrl = url || getCdnUrl(name, version);
+  const type = await resolveLibraryType(finalUrl);
+  libs.push({ name, version, url: finalUrl, type });
   setState('libraries', libs);
 }
 

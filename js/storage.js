@@ -4,6 +4,7 @@ import LZString from 'lz-string';
 import { getState, setMultiple, get } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
+import { inferTypeFromUrl } from './libraries.js';
 
 const PREFIX = 'jsmess_mess_';
 
@@ -266,7 +267,12 @@ export async function exportStaticSite(onProgress, signal) {
 
   const libraries = get('libraries') || [];
   const libTags = libraries
-    .map(lib => `  <script src="${lib.url}"><\/script>`)
+    .map(lib => {
+      const type = lib.type || inferTypeFromUrl(lib.url) || 'js';
+      return type === 'css'
+        ? `  <link rel="stylesheet" href="${lib.url}">`
+        : `  <script src="${lib.url}"><\/script>`;
+    })
     .join('\n');
 
   let headScript = '';

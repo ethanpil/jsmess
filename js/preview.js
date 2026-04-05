@@ -1,6 +1,7 @@
 // JSMess Preview - iframe srcdoc + console capture
 
 import { get } from './state.js';
+import { inferTypeFromUrl } from './libraries.js';
 
 let sassModule = null;
 const consoleListeners = [];
@@ -90,9 +91,15 @@ export async function run() {
     }
   }
 
-  // Build library script tags
+  // Build library tags — CSS as <link>, JS as <script>
   const libTags = libraries
-    .map((lib) => `<script src="${escapeHtml(lib.url)}"><\/script>`)
+    .map((lib) => {
+      const type = lib.type || inferTypeFromUrl(lib.url) || 'js';
+      const safeUrl = escapeHtml(lib.url);
+      return type === 'css'
+        ? `<link rel="stylesheet" href="${safeUrl}">`
+        : `<script src="${safeUrl}"><\/script>`;
+    })
     .join('\n');
 
   // Wrap JS based on mode
@@ -111,8 +118,8 @@ export async function run() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>${cssCode}</style>
   ${libTags}
+  <style>${cssCode}</style>
   ${CONSOLE_CAPTURE_SCRIPT}
   ${jsInHead}
 </head>
