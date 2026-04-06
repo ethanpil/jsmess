@@ -130,8 +130,8 @@ function setupToolbarActions() {
   // Share button
   const shareBtn = document.getElementById('btn-share');
   if (shareBtn) {
-    shareBtn.addEventListener('click', () => {
-      const hash = exportToHash();
+    shareBtn.addEventListener('click', async () => {
+      const hash = await exportToHash();
       window.location.hash = hash;
       navigator.clipboard.writeText(window.location.href).then(() => {
         showToast('Link copied to clipboard!');
@@ -522,6 +522,14 @@ function setupFontSettings() {
   fontSelector.value = savedFont;
   sizeSlider.value = savedSize;
   if (sizeValue) sizeValue.textContent = savedSize + 'px';
+
+  // Lazy-load all Google Fonts when the selector is first opened
+  fontSelector.addEventListener('focus', () => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Cascadia+Code&family=Fira+Code&family=IBM+Plex+Mono&family=Inconsolata&family=JetBrains+Mono&family=Overpass+Mono&family=Source+Code+Pro&family=Space+Mono&family=Ubuntu+Mono&display=swap';
+    document.head.appendChild(link);
+  }, { once: true });
 
   fontSelector.addEventListener('change', () => {
     localStorage.setItem(FONT_KEY, fontSelector.value);

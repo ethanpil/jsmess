@@ -15,10 +15,32 @@
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="img/code-scan-svgrepo-com.svg">
 
-  <!-- Google Fonts for editor -->
+  <!-- Google Fonts preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cascadia+Code&family=Fira+Code&family=IBM+Plex+Mono&family=Inconsolata&family=JetBrains+Mono&family=Overpass+Mono&family=Source+Code+Pro&family=Space+Mono&family=Ubuntu+Mono&display=swap">
+
+  <!-- Sync theme + font detection — runs before any CSS paints -->
+  <script>
+    (function() {
+      // Theme: apply immediately to prevent flash
+      var s; try { s = localStorage.getItem('jsmess_theme'); } catch(e) {}
+      var t = s || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', t);
+
+      // Font: load only the user's selected font (not all 9)
+      var fonts = {'Cascadia Code':'Cascadia+Code','Fira Code':'Fira+Code',
+        'IBM Plex Mono':'IBM+Plex+Mono','Inconsolata':'Inconsolata',
+        'JetBrains Mono':'JetBrains+Mono','Overpass Mono':'Overpass+Mono',
+        'Source Code Pro':'Source+Code+Pro','Space Mono':'Space+Mono',
+        'Ubuntu Mono':'Ubuntu+Mono'};
+      var sf; try { sf = localStorage.getItem('jsmess_editorFont'); } catch(e) {}
+      var fn = fonts[sf] || 'Source+Code+Pro';
+      var lk = document.createElement('link');
+      lk.rel = 'stylesheet';
+      lk.href = 'https://fonts.googleapis.com/css2?family=' + fn + '&display=swap';
+      document.head.appendChild(lk);
+    })();
+  </script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="css/theme.css">
@@ -26,30 +48,44 @@
   <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="css/console.css">
 
-  <!-- Preload CodeMirror modules — fetch starts during HTML parse -->
-  <link rel="preload" href="https://esm.sh/@codemirror/state" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/view" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/commands" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/search" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/autocomplete" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/language" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/lint" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/lang-html" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/lang-css" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/lang-javascript" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@codemirror/theme-one-dark" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/@replit/codemirror-minimap" as="fetch" crossorigin>
-  <link rel="preload" href="https://esm.sh/split.js@1.6.5" as="fetch" crossorigin>
-  <link rel="preload" href="https://jspm.dev/sass" as="fetch" crossorigin>
+  <!-- Modulepreload CodeMirror — parse+compile starts during HTML parse -->
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/state" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/view" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/commands" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/search" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/autocomplete" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/language" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lint" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-html" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-css" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-javascript" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/theme-one-dark" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@replit/codemirror-minimap" crossorigin>
 
   <!-- Loading skeleton — renders immediately before any JS executes -->
   <style>
     #app.loading .panel-body,
     #app.loading .result-content {
-      background: var(--bg-secondary, #1e1e2e);
+      background: var(--bg-secondary);
       position: relative;
       overflow: hidden;
     }
+    /* Faint code-line placeholders */
+    #app.loading .panel-body::before {
+      content: '';
+      display: block;
+      position: absolute;
+      inset: 0;
+      padding-left: 48px;
+      opacity: 0.3;
+      background: repeating-linear-gradient(
+        to bottom,
+        var(--bg-tertiary) 0px, var(--bg-tertiary) 10px,
+        transparent 10px, transparent 24px
+      );
+      transition: opacity 0.15s ease-out;
+    }
+    /* Shimmer overlay */
     #app.loading .panel-body::after,
     #app.loading .result-content::after {
       content: '';
@@ -57,20 +93,27 @@
       inset: 0;
       background: linear-gradient(90deg, transparent, rgba(128,128,128,0.08), transparent);
       animation: skeleton-shimmer 1.5s infinite;
+      transition: opacity 0.15s ease-out;
     }
     @keyframes skeleton-shimmer {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
+    /* Reserve CM gutter width */
+    #app.loading .panel-body { padding-left: 48px; }
     #app.loading .toolbar-btn { pointer-events: none; opacity: 0.5; }
+    /* Smooth fade-out before skeleton removal */
+    #app.loading-done .panel-body::before,
+    #app.loading-done .panel-body::after,
+    #app.loading-done .result-content::after { opacity: 0; }
   </style>
 
   <!-- Import Map - only non-CodeMirror deps (CM handled by js/cm.js wrapper) -->
   <script type="importmap">
   {
     "imports": {
-      "split.js": "https://esm.sh/split.js@1.6.5",
-      "lz-string": "https://esm.sh/lz-string@1.5.0",
+      "split.js": "./js/vendor/split.min.js",
+      "lz-string": "./js/vendor/lz-string.min.js",
       "jszip": "https://esm.sh/jszip@3.10.1"
     }
   }

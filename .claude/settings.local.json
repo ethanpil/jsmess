@@ -20,7 +20,13 @@
       "Bash(powershell -Command \"\\(Invoke-WebRequest -Uri ''http://localhost:8090/'' -UseBasicParsing -TimeoutSec 10\\).StatusCode\")",
       "Bash(powershell -Command \"\\(Get-Content index.html | Measure-Object -Line\\).Lines\")",
       "Bash(python -c \"import http.server; print\\(''python http.server OK''\\)\")",
-      "Bash(curl --max-time 5 -s \"http://localhost:8090/\")"
+      "Bash(curl --max-time 5 -s \"http://localhost:8090/\")",
+      "Bash(where static-web-server.exe)",
+      "Bash(ls -la /c/Users/Admin/OneDrive/Documents/Code/jsmess/static-web-server*)",
+      "Bash(curl -sL \"https://esm.sh/split.js@1.6.5\" -o /c/Users/Admin/OneDrive/Documents/Code/jsmess/js/vendor/split.min.js)",
+      "Bash(curl -sL \"https://esm.sh/split.js@1.6.5?bundle\" -o /c/Users/Admin/OneDrive/Documents/Code/jsmess/js/vendor/split.min.js)",
+      "Bash(curl -sL \"https://esm.sh/split.js@1.6.5/es2022/split.bundle.mjs\" -o /c/Users/Admin/OneDrive/Documents/Code/jsmess/js/vendor/split.min.js)",
+      "Bash(curl -sL \"https://esm.sh/lz-string@1.5.0/es2022/lz-string.bundle.mjs\" -o /c/Users/Admin/OneDrive/Documents/Code/jsmess/js/vendor/lz-string.min.js)"
     ]
   }
 }

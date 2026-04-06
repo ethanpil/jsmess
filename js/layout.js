@@ -45,9 +45,6 @@ function applyLayout(layout) {
   const area = document.querySelector('.editor-area');
   if (!area) return;
 
-  // Hide during layout recalculation to prevent flash
-  area.style.visibility = 'hidden';
-
   const topRow = document.getElementById('top-row');
   const bottomRow = document.getElementById('bottom-row');
   const htmlPanel = document.getElementById('html-panel');
@@ -172,9 +169,6 @@ function applyLayout(layout) {
       onDragEnd: () => refreshEditors(),
     }));
   }
-
-  // Reveal layout immediately after splits are created
-  area.style.visibility = '';
 
   // Delay editor refresh for DOM to settle
   requestAnimationFrame(() => refreshEditors());

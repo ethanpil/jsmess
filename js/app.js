@@ -23,7 +23,7 @@ async function init() {
   initEditors();
 
   // Load content before layout so Split.js sizes correctly
-  const loaded = importFromHash();
+  const loaded = await importFromHash();
 
   initLayout();
   initShortcuts();
@@ -32,15 +32,23 @@ async function init() {
   // Run initial preview
   run();
 
-  // Remove loading skeleton
-  document.getElementById('app')?.classList.remove('loading');
+  // Smooth skeleton fade-out, then remove
+  const appEl = document.getElementById('app');
+  if (appEl) {
+    appEl.classList.add('loading-done');
+    setTimeout(() => appEl.classList.remove('loading', 'loading-done'), 150);
+  }
 
-  // Preload SASS compiler in background for faster first Run
-  preloadSass();
+  // Preload SASS compiler in background — defer to avoid bandwidth contention
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => preloadSass());
+  } else {
+    setTimeout(() => preloadSass(), 2000);
+  }
 
   // Listen for hash changes
-  window.addEventListener('hashchange', () => {
-    importFromHash();
+  window.addEventListener('hashchange', async () => {
+    await importFromHash();
     run();
   });
 

@@ -298,6 +298,15 @@
   display: none;
 }
 
+/* Reserve gutter space during loading to prevent layout shift */
+#app.loading .editor-area {
+  gap: var(--gutter-size);
+}
+
+#app.loading .split-row {
+  gap: var(--gutter-size);
+}
+
 /* Split.js gutter styling */
 .gutter {
   background: var(--gutter-color);

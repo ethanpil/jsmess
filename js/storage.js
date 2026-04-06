@@ -1,9 +1,15 @@
 // JSMess Storage - localStorage + URL hash (LZ-String)
 
-import LZString from 'lz-string';
 import { getState, setMultiple, get } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
+
+// Lazy-loaded — only needed for shared links (code= hash) and share export
+let _lz = null;
+async function getLZ() {
+  if (!_lz) _lz = (await import('lz-string')).default;
+  return _lz;
+}
 
 const PREFIX = 'jsmess_mess_';
 
@@ -129,7 +135,8 @@ export function listMesses() {
 }
 
 // Encode state to shareable URL hash
-export function exportToHash() {
+export async function exportToHash() {
+  const LZString = await getLZ();
   const data = {
     h: get('html'),
     c: get('css'),
@@ -151,7 +158,7 @@ export function exportToHash() {
 }
 
 // Import from URL hash
-export function importFromHash() {
+export async function importFromHash() {
   const hash = window.location.hash.substring(1);
   if (!hash) return false;
 
@@ -161,6 +168,7 @@ export function importFromHash() {
   }
 
   if (hash.startsWith('code=')) {
+    const LZString = await getLZ();
     const compressed = hash.substring(5);
     try {
       const json = LZString.decompressFromEncodedURIComponent(compressed);
@@ -179,7 +187,7 @@ export function importFromHash() {
       });
       setContent('html', data.h || '');
       setContent('css', data.c || '');
-      setContent('js', data.j || '');
+      setContent('js', data.js || '');
       return true;
     } catch (e) {
       console.error('Failed to import from hash:', e);

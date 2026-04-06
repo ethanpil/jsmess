@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "jsmess-dev",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["serve.py"],
+      "runtimeExecutable": "static-web-server.exe",
+      "runtimeArgs": ["-w", "static-web-server.toml"],
       "port": 8090
     }
   ]
