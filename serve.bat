@@ -1,0 +1,1 @@
+static-web-server -w static-web-server.toml
