@@ -91,6 +91,11 @@
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+[data-theme="dark"] .toolbar-brand img,
+[data-theme="dark"] img[src="img/github-mark.svg"] {
+  filter: brightness(0) invert(1);
+}
+
 /* Base resets */
 *,
 *::before,
