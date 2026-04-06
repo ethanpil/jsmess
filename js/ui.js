@@ -633,57 +633,75 @@ function setupMessesModal() {
 function openMessesModal() {
   const modal = document.getElementById('messes-modal');
   const list = document.getElementById('messes-list');
+  let search = document.getElementById('messes-search');
   if (!modal || !list) return;
 
   modal.classList.remove('hidden');
+  if (search) search.value = '';
 
   const messes = listMesses();
-  list.innerHTML = '';
 
-  if (messes.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No saved messes yet.</p>';
-    return;
+  function renderList(items) {
+    list.innerHTML = '';
+    if (messes.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No saved messes yet.</p>';
+      return;
+    }
+    if (items.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px;">No messes match your search.</p>';
+      return;
+    }
+    for (const f of items) {
+      const item = document.createElement('div');
+      item.className = 'mess-item';
+      const date = f.updatedAt ? new Date(f.updatedAt).toLocaleDateString() : '';
+      let expiryLabel = '';
+      if (f.expiration && f.expiration > 0 && f.updatedAt) {
+        const expiresAt = f.updatedAt + f.expiration * 86400000;
+        const daysLeft = Math.ceil((expiresAt - Date.now()) / 86400000);
+        if (daysLeft <= 0) {
+          expiryLabel = '<span class="mess-item-expiry expired">Expired</span>';
+        } else if (daysLeft === 1) {
+          expiryLabel = '<span class="mess-item-expiry">Expires tomorrow</span>';
+        } else {
+          expiryLabel = `<span class="mess-item-expiry">Expires in ${daysLeft} days</span>`;
+        }
+      }
+      item.innerHTML = `
+        <div>
+          <div class="mess-item-title">${escapeHtml(f.title)}</div>
+          <div class="mess-item-date">${date} ${expiryLabel}</div>
+        </div>
+        <div class="mess-item-actions">
+          <button class="load" title="Load">Open</button>
+          <button class="delete" title="Delete">&times;</button>
+        </div>
+      `;
+      item.querySelector('.load').addEventListener('click', () => {
+        loadMess(f.id);
+        closeMessesModal();
+        run();
+      });
+      item.querySelector('.delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm(`Delete "${f.title}"?`)) {
+          deleteMess(f.id);
+          openMessesModal(); // refresh list
+        }
+      });
+      list.appendChild(item);
+    }
   }
 
-  for (const f of messes) {
-    const item = document.createElement('div');
-    item.className = 'mess-item';
-    const date = f.updatedAt ? new Date(f.updatedAt).toLocaleDateString() : '';
-    let expiryLabel = '';
-    if (f.expiration && f.expiration > 0 && f.updatedAt) {
-      const expiresAt = f.updatedAt + f.expiration * 86400000;
-      const daysLeft = Math.ceil((expiresAt - Date.now()) / 86400000);
-      if (daysLeft <= 0) {
-        expiryLabel = '<span class="mess-item-expiry expired">Expired</span>';
-      } else if (daysLeft === 1) {
-        expiryLabel = '<span class="mess-item-expiry">Expires tomorrow</span>';
-      } else {
-        expiryLabel = `<span class="mess-item-expiry">Expires in ${daysLeft} days</span>`;
-      }
-    }
-    item.innerHTML = `
-      <div>
-        <div class="mess-item-title">${escapeHtml(f.title)}</div>
-        <div class="mess-item-date">${date} ${expiryLabel}</div>
-      </div>
-      <div class="mess-item-actions">
-        <button class="load" title="Load">Open</button>
-        <button class="delete" title="Delete">&times;</button>
-      </div>
-    `;
-    item.querySelector('.load').addEventListener('click', () => {
-      loadMess(f.id);
-      closeMessesModal();
-      run();
+  renderList(messes);
+
+  if (search) {
+    const fresh = search.cloneNode(true);
+    search.replaceWith(fresh);
+    fresh.addEventListener('input', () => {
+      const q = fresh.value.trim().toLowerCase();
+      renderList(q ? messes.filter(f => f.title.toLowerCase().includes(q)) : messes);
     });
-    item.querySelector('.delete').addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (confirm(`Delete "${f.title}"?`)) {
-        deleteMess(f.id);
-        openMessesModal(); // refresh list
-      }
-    });
-    list.appendChild(item);
   }
 }
 

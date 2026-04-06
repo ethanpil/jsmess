@@ -19,7 +19,8 @@
       "Bash(powershell -Command \"\\(Invoke-WebRequest -Uri ''http://localhost:8090/'' -UseBasicParsing -TimeoutSec 5\\).StatusCode\")",
       "Bash(powershell -Command \"\\(Invoke-WebRequest -Uri ''http://localhost:8090/'' -UseBasicParsing -TimeoutSec 10\\).StatusCode\")",
       "Bash(powershell -Command \"\\(Get-Content index.html | Measure-Object -Line\\).Lines\")",
-      "Bash(python -c \"import http.server; print\\(''python http.server OK''\\)\")"
+      "Bash(python -c \"import http.server; print\\(''python http.server OK''\\)\")",
+      "Bash(curl --max-time 5 -s \"http://localhost:8090/\")"
     ]
   }
 }
