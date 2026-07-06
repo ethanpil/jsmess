@@ -72,7 +72,7 @@ function getFontTheme(family, size) {
   });
 }
 
-function createEditor(container, lang, stateKey, placeholder) {
+function createEditor(container, lang, stateKey) {
   const langExtension = lang === 'html' ? html() : lang === 'css' ? css() : javascript();
 
   const updateListener = EditorView.updateListener.of((update) => {
@@ -101,7 +101,6 @@ function createEditor(container, lang, stateKey, placeholder) {
         EditorView.contentAttributes.of({
           'aria-label': `${lang.toUpperCase()} editor`,
         }),
-        placeholder ? placeholderExtension(placeholder) : [],
       ].flat(),
     }),
     parent: container,
@@ -118,16 +117,6 @@ function createEditor(container, lang, stateKey, placeholder) {
   }
 
   return view;
-}
-
-function placeholderExtension(text) {
-  // Simple placeholder via DOM
-  return EditorView.theme({
-    '.cm-placeholder': {
-      color: 'var(--text-muted)',
-      fontStyle: 'italic',
-    },
-  });
 }
 
 export function initEditors() {
