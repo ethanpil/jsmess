@@ -106,9 +106,9 @@ export async function run() {
   const wrappedJs = wrapJsCode(jsCode, wrapMode);
 
   if (wrapMode === 'noWrapHead') {
-    jsInHead = `<script>${jsCode}<\/script>`;
+    jsInHead = `<script>${escapeScriptEnd(jsCode)}<\/script>`;
   } else {
-    jsInBody = `<script>${wrappedJs}<\/script>`;
+    jsInBody = `<script>${escapeScriptEnd(wrappedJs)}<\/script>`;
   }
 
   const doc = `<!DOCTYPE html>
@@ -152,6 +152,13 @@ export function preloadSass() {
       // Silently fail — will retry on first use
     });
   }
+}
+
+// A literal </script> inside user JS (e.g. in a string) would terminate the
+// inline script tag and corrupt the srcdoc document. <\/script is equivalent
+// inside JS strings/regex, so this is safe to apply to the whole source.
+function escapeScriptEnd(code) {
+  return code.replace(/<\/script/gi, '<\\/script');
 }
 
 function escapeHtml(str) {
