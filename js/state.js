@@ -10,7 +10,7 @@ const state = {
   libraries: [], // [{name, version, url}]
   expiration: 0, // 0 = keep forever, or days (1, 10, 30, 180, 365)
   styleType: 'css', // css, sass — css default: plain CSS skips the heavy remote compiler
-  layout: 'classic', // classic, left, columns, tabs
+  layout: 'classic', // classic, columns, tabs
   theme: null, // null = system, 'light', 'dark'
 };
 
