@@ -70,6 +70,7 @@ export function saveMess(title) {
   localStorage.setItem(PREFIX + id, JSON.stringify(data));
   setHashSilently(`id=${id}`);
   setDirty(false);
+  clearDraft(); // the work is saved; the recovery draft is obsolete
   return id;
 }
 
@@ -451,6 +452,66 @@ export function restoreFullBackup(backupData, onProgress, signal) {
 
   onProgress('Done!', 100);
   return { restored, skipped };
+}
+
+// ---- Draft auto-save -------------------------------------------------
+// One rolling draft of unsaved work, written on a debounce while dirty and
+// offered for recovery on the next plain (hash-less) load.
+
+const DRAFT_KEY = 'jsmess_draft';
+
+export function saveDraft() {
+  const data = {
+    id: get('id'),
+    title: get('title'),
+    html: get('html'),
+    css: get('css'),
+    js: get('js'),
+    wrapMode: get('wrapMode'),
+    styleType: get('styleType'),
+    libraries: get('libraries'),
+    expiration: get('expiration') || 0,
+    savedAt: Date.now(),
+  };
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+  } catch (e) {
+    // storage full — drafts are best-effort
+  }
+}
+
+export function loadDraftData() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function restoreDraft() {
+  const data = loadDraftData();
+  if (!data) return false;
+  setMultiple({
+    id: data.id || null,
+    title: data.title || 'Untitled',
+    html: data.html || '',
+    css: data.css || '',
+    js: data.js || '',
+    wrapMode: data.wrapMode || 'onLoad',
+    styleType: data.styleType || 'css',
+    libraries: data.libraries || [],
+    expiration: data.expiration || 0,
+  });
+  setContent('html', data.html || '');
+  setContent('css', data.css || '');
+  setContent('js', data.js || '');
+  setDirty(true); // restored content is still unsaved
+  return true;
+}
+
+export function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
 }
 
 // Clean up expired messes from localStorage
