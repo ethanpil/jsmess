@@ -32,7 +32,15 @@ import { setLayout, getLayoutOptions } from './layout.js';
 import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
 import { undo, redo } from './cm.js';
 
-let consoleEntries = [];
+// Console rendering: entries are buffered and flushed once per animation
+// frame, and only the newest MAX_CONSOLE_ENTRIES stay in the DOM — a user
+// loop logging 100k messages must not freeze the page.
+const MAX_CONSOLE_ENTRIES = 500;
+let consoleTotalCount = 0;      // all messages received since last clear
+let consoleRetainedCount = 0;   // entry nodes currently in the DOM
+let consoleDroppedCount = 0;    // entries removed to stay under the cap
+let pendingConsoleEntries = [];
+let consoleFlushScheduled = false;
 
 export function initUI() {
   setupToolbarActions();
@@ -273,9 +281,15 @@ async function handleToolAction(action) {
 // Console
 function setupConsole() {
   onConsoleMessage((entry) => {
-    consoleEntries.push(entry);
-    renderConsoleEntry(entry);
-    updateConsoleCount();
+    consoleTotalCount++;
+    // Cap the buffer at intake so a logging loop can't grow memory while
+    // a flush is pending (or while the tab is hidden and flushes are slow).
+    if (pendingConsoleEntries.length >= MAX_CONSOLE_ENTRIES) {
+      pendingConsoleEntries.shift();
+      consoleDroppedCount++;
+    }
+    pendingConsoleEntries.push(entry);
+    scheduleConsoleFlush();
   });
 
   // Console tabs
@@ -314,22 +328,69 @@ function switchResultTab(tab) {
   }
 }
 
-function renderConsoleEntry(entry) {
+function scheduleConsoleFlush() {
+  if (consoleFlushScheduled) return;
+  consoleFlushScheduled = true;
+  // requestAnimationFrame never fires while the tab is hidden — fall back
+  // to a timer there so entries still land (and the badge stays current).
+  if (document.hidden) {
+    setTimeout(flushConsoleEntries, 50);
+  } else {
+    requestAnimationFrame(flushConsoleEntries);
+  }
+}
+
+function flushConsoleEntries() {
+  consoleFlushScheduled = false;
   const output = document.getElementById('console-output');
-  if (!output) return;
+  const pending = pendingConsoleEntries;
+  pendingConsoleEntries = [];
+  if (!output || pending.length === 0) {
+    updateConsoleCount();
+    return;
+  }
 
   const emptyMsg = output.querySelector('.console-empty');
   if (emptyMsg) emptyMsg.remove();
 
-  const div = document.createElement('div');
-  div.className = `console-entry ${entry.method}`;
-  div.textContent = entry.args.join(' ');
-  output.appendChild(div);
+  const frag = document.createDocumentFragment();
+  for (const entry of pending) {
+    const div = document.createElement('div');
+    div.className = `console-entry ${entry.method}`;
+    div.textContent = entry.args.join(' ');
+    frag.appendChild(div);
+  }
+  output.appendChild(frag);
+  consoleRetainedCount += pending.length;
+
+  // Evict oldest entries beyond the cap (skip the dropped-notice node).
+  while (consoleRetainedCount > MAX_CONSOLE_ENTRIES) {
+    const first = output.querySelector('.console-entry:not(.console-dropped)');
+    if (!first) break;
+    first.remove();
+    consoleRetainedCount--;
+    consoleDroppedCount++;
+  }
+
+  if (consoleDroppedCount > 0) {
+    let notice = output.querySelector('.console-dropped');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.className = 'console-entry console-dropped debug';
+      output.prepend(notice);
+    }
+    notice.textContent = `… ${consoleDroppedCount} earlier message(s) dropped`;
+  }
+
   output.scrollTop = output.scrollHeight;
+  updateConsoleCount();
 }
 
 function clearConsole() {
-  consoleEntries = [];
+  consoleTotalCount = 0;
+  consoleRetainedCount = 0;
+  consoleDroppedCount = 0;
+  pendingConsoleEntries = [];
   const output = document.getElementById('console-output');
   if (output) {
     output.innerHTML = '<div class="console-empty">Console output will appear here...</div>';
@@ -340,7 +401,7 @@ function clearConsole() {
 function updateConsoleCount() {
   const badge = document.getElementById('console-count');
   if (badge) {
-    badge.textContent = consoleEntries.length > 0 ? `(${consoleEntries.length})` : '';
+    badge.textContent = consoleTotalCount > 0 ? `(${consoleTotalCount})` : '';
   }
 }
 
