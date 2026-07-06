@@ -10,13 +10,8 @@ import {
   indentUnit,
 } from './cm.js';
 import { setState } from './state.js';
+import { getPref } from './prefs.js';
 
-const LINENUMBERS_KEY = 'jsmess_lineNumbers';
-const MINIMAP_KEY = 'jsmess_minimap';
-const INDENT_TYPE_KEY = 'jsmess_indentType';
-const INDENT_SIZE_KEY = 'jsmess_indentSize';
-const FONT_KEY = 'jsmess_editorFont';
-const FONT_SIZE_KEY = 'jsmess_fontSize';
 const FONT_FALLBACK = "'SF Mono', 'Consolas', 'Monaco', monospace";
 const MINIMAP_HIDE_DELAY = 1500;
 let themeCompartment;
@@ -34,11 +29,11 @@ function getLineNumbersExtensions() {
 }
 
 function isLineNumbersEnabled() {
-  return localStorage.getItem(LINENUMBERS_KEY) !== 'false';
+  return getPref('lineNumbers') !== 'false';
 }
 
 function isMinimapEnabled() {
-  return localStorage.getItem(MINIMAP_KEY) === 'true';
+  return getPref('minimap') === 'true';
 }
 
 function getMinimapExtension() {
@@ -50,19 +45,19 @@ function getMinimapExtension() {
 }
 
 function getIndentType() {
-  return localStorage.getItem(INDENT_TYPE_KEY) || 'spaces';
+  return getPref('indentType') || 'spaces';
 }
 
 function getIndentSize() {
-  return parseInt(localStorage.getItem(INDENT_SIZE_KEY), 10) || 2;
+  return parseInt(getPref('indentSize'), 10) || 2;
 }
 
 function getEditorFont() {
-  return localStorage.getItem(FONT_KEY) || 'Source Code Pro';
+  return getPref('editorFont') || 'Source Code Pro';
 }
 
 function getFontSize() {
-  return parseInt(localStorage.getItem(FONT_SIZE_KEY), 10) || 13;
+  return parseInt(getPref('fontSize'), 10) || 13;
 }
 
 function getFontTheme(family, size) {

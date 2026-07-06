@@ -1,6 +1,6 @@
 // JSMess Format - Prettier standalone (lazy-loaded)
 
-import { getContent, setContent } from './editors.js';
+import { getContent, setContent, getIndentType, getIndentSize } from './editors.js';
 import { get } from './state.js';
 
 let prettier = null;
@@ -53,8 +53,8 @@ async function formatOne(editorKey, parser) {
     else if (parser === 'css') plugins.push(parserCss);
     else if (parser === 'babel') plugins.push(parserBabel);
 
-    const useTabs = localStorage.getItem('jsmess_indentType') === 'tabs';
-    const tabWidth = parseInt(localStorage.getItem('jsmess_indentSize'), 10) || 2;
+    const useTabs = getIndentType() === 'tabs';
+    const tabWidth = getIndentSize();
 
     const formatted = await prettier.format(code, {
       parser,
