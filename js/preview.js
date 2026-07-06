@@ -56,9 +56,14 @@ const CONSOLE_CAPTURE_SCRIPT = `
 <\/script>
 `;
 
+// Pinned to the exact version jspm.dev already serves for bare 'sass'.
+// esm.sh builds of sass fail in the browser (dynamic require of node
+// builtins), so jspm.dev stays the source — but now drift-proof.
+const SASS_URL = 'https://jspm.dev/sass@1.69.5';
+
 export async function compileSass(code) {
   if (!sassModule) {
-    sassModule = await import('https://jspm.dev/sass');
+    sassModule = await import(SASS_URL);
   }
   const sass = sassModule.default || sassModule;
   const result = sass.compileString(code);
@@ -146,7 +151,7 @@ export function wrapJsCode(code, mode) {
 
 export function preloadSass() {
   if (!sassModule) {
-    import('https://jspm.dev/sass').then(m => {
+    import(SASS_URL).then(m => {
       sassModule = m;
     }).catch(() => {
       // Silently fail — will retry on first use

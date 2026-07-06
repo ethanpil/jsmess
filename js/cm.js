@@ -1,7 +1,9 @@
 // JSMess CodeMirror Wrapper
 // All CodeMirror imports go through this file to ensure shared singleton instances.
-// We import all @codemirror/* packages without pinned versions so esm.sh resolves
-// them to consistent transitive dependency versions (avoiding duplicate @codemirror/state).
+// Versions are pinned so upstream releases can't break the site and so the CDN
+// serves immutable, long-cached URLs. Keep all pins on versions whose shared
+// dependencies (@codemirror/state, @codemirror/view) resolve identically, and
+// update the modulepreload links in index.html in lockstep.
 
 // Deferred initialization — exports are populated by initCM() so the module graph
 // is not blocked by network requests.  All consumers use these via live bindings
@@ -37,18 +39,18 @@ export function initCM() {
   if (_readyPromise) return _readyPromise;
 
   _readyPromise = Promise.all([
-    import('https://esm.sh/@codemirror/state'),
-    import('https://esm.sh/@codemirror/view'),
-    import('https://esm.sh/@codemirror/commands'),
-    import('https://esm.sh/@codemirror/search'),
-    import('https://esm.sh/@codemirror/autocomplete'),
-    import('https://esm.sh/@codemirror/language'),
-    import('https://esm.sh/@codemirror/lint'),
-    import('https://esm.sh/@codemirror/lang-html'),
-    import('https://esm.sh/@codemirror/lang-css'),
-    import('https://esm.sh/@codemirror/lang-javascript'),
-    import('https://esm.sh/@codemirror/theme-one-dark'),
-    import('https://esm.sh/@replit/codemirror-minimap'),
+    import('https://esm.sh/@codemirror/state@6.7.1'),
+    import('https://esm.sh/@codemirror/view@6.43.5'),
+    import('https://esm.sh/@codemirror/commands@6.10.4'),
+    import('https://esm.sh/@codemirror/search@6.7.1'),
+    import('https://esm.sh/@codemirror/autocomplete@6.20.3'),
+    import('https://esm.sh/@codemirror/language@6.12.4'),
+    import('https://esm.sh/@codemirror/lint@6.9.7'),
+    import('https://esm.sh/@codemirror/lang-html@6.4.11'),
+    import('https://esm.sh/@codemirror/lang-css@6.3.1'),
+    import('https://esm.sh/@codemirror/lang-javascript@6.2.5'),
+    import('https://esm.sh/@codemirror/theme-one-dark@6.1.3'),
+    import('https://esm.sh/@replit/codemirror-minimap@0.5.2'),
   ]).then(([stateM, viewM, commandsM, searchM, autoM, langM, lintM, htmlM, cssM, jsM, darkM, minimapM]) => {
     // Core classes
     EditorState = stateM.EditorState;
