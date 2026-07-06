@@ -154,10 +154,12 @@ function setupToolbarActions() {
     shareBtn.addEventListener('click', async () => {
       const hash = await exportToHash();
       setHashSilently(hash);
+      // Beyond ~2000 chars, URLs get truncated by some browsers and chat apps
+      const lengthNote = hash.length > 2000 ? ' Note: link is very long and may not work everywhere.' : '';
       navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Link copied to clipboard!');
+        showToast('Link copied to clipboard!' + lengthNote);
       }).catch(() => {
-        showToast('URL updated — copy from address bar');
+        showToast('URL updated — copy from address bar.' + lengthNote);
       });
     });
   }

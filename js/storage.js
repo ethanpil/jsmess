@@ -167,11 +167,6 @@ export async function exportToHash() {
   };
   const json = JSON.stringify(data);
   const compressed = LZString.compressToEncodedURIComponent(json);
-
-  if (compressed.length > 2000) {
-    console.warn('Mess is large — URL may be truncated by some browsers.');
-  }
-
   return `code=${compressed}`;
 }
 
