@@ -29,7 +29,7 @@ import {
   moveLibrary,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
+import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType, refreshEditors } from './editors.js';
 import { undo, redo } from './cm.js';
 import { getPref, setPref } from './prefs.js';
 import { escapeHtml, filenameFromUrl } from './util.js';
@@ -317,6 +317,18 @@ function setupConsole() {
   const clearBtn = document.getElementById('btn-clear-console');
   if (clearBtn) {
     clearBtn.addEventListener('click', clearConsole);
+  }
+
+  // Maximize/restore the result panel
+  const maxBtn = document.getElementById('btn-maximize-result');
+  const area = document.querySelector('.editor-area');
+  if (maxBtn && area) {
+    maxBtn.addEventListener('click', () => {
+      const on = area.classList.toggle('result-maximized');
+      maxBtn.classList.toggle('active', on);
+      maxBtn.title = on ? 'Restore layout' : 'Maximize preview';
+      refreshEditors(); // editors re-measure when their panes reappear
+    });
   }
 }
 

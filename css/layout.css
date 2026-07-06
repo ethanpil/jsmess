@@ -282,6 +282,44 @@
   border-bottom-color: var(--accent);
 }
 
+/* Maximize/restore toggle at the right edge of the tab bar */
+.result-maximize-btn {
+  margin-left: auto;
+  padding: 4px 10px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.result-maximize-btn:hover {
+  color: var(--text-secondary);
+}
+
+.result-maximize-btn.active {
+  color: var(--accent);
+}
+
+/* Maximized result: hide the editor panes (and any Split.js gutters) so
+   the result panel fills the whole editor area, in every layout */
+.editor-area.result-maximized .editor-panel,
+.editor-area.result-maximized #tabs-left,
+.editor-area.result-maximized .gutter,
+.editor-area.result-maximized #top-row {
+  display: none !important;
+}
+
+.editor-area.result-maximized #bottom-row {
+  display: flex !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+.editor-area.result-maximized .result-panel {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 1 auto !important;
+}
+
 .result-content {
   flex: 1;
   overflow: hidden;
