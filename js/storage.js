@@ -187,7 +187,7 @@ export async function importFromHash() {
       });
       setContent('html', data.h || '');
       setContent('css', data.c || '');
-      setContent('js', data.js || '');
+      setContent('js', data.j || '');
       return true;
     } catch (e) {
       console.error('Failed to import from hash:', e);
