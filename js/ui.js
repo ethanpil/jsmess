@@ -33,6 +33,7 @@ import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEdi
 import { undo, redo } from './cm.js';
 import { getPref, setPref } from './prefs.js';
 import { escapeHtml, filenameFromUrl } from './util.js';
+import { getShortcutList } from './shortcuts.js';
 
 // Console rendering: entries are buffered and flushed once per animation
 // frame, and only the newest MAX_CONSOLE_ENTRIES stay in the DOM — a user
@@ -52,6 +53,7 @@ export function initUI() {
   setupConsole();
   setupSettingsDrawer();
   setupMessesModal();
+  setupShortcutsModal();
   setupMessTitle();
   setupLibraryInput();
   updateLibraryList();
@@ -249,6 +251,11 @@ async function handleToolAction(action) {
     return;
   }
 
+  if (action === 'shortcuts') {
+    openShortcutsModal();
+    return;
+  }
+
   if (action === 'tabs-to-spaces') {
     const size = getIndentSize();
     const spaces = ' '.repeat(size);
@@ -441,6 +448,11 @@ function toggleSettings() {
   const overlay = document.getElementById('settings-overlay');
   if (drawer) drawer.classList.toggle('open');
   if (overlay) overlay.classList.toggle('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-drawer')?.classList.remove('open');
+  document.getElementById('settings-overlay')?.classList.remove('open');
 }
 
 // Mess title input
@@ -832,6 +844,52 @@ function openMessesModal() {
 function closeMessesModal() {
   const modal = document.getElementById('messes-modal');
   if (modal) modal.classList.add('hidden');
+}
+
+// Keyboard shortcuts modal
+function setupShortcutsModal() {
+  const overlay = document.getElementById('shortcuts-modal');
+  const closeBtn = document.getElementById('shortcuts-modal-close');
+
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => overlay?.classList.add('hidden'));
+  }
+
+  document.addEventListener('action-show-shortcuts', openShortcutsModal);
+
+  // Link in the settings drawer — close the drawer so the modal isn't
+  // stacked behind it
+  const drawerBtn = document.getElementById('btn-show-shortcuts');
+  if (drawerBtn) {
+    drawerBtn.addEventListener('click', () => {
+      closeSettings();
+      openShortcutsModal();
+    });
+  }
+}
+
+function openShortcutsModal() {
+  const modal = document.getElementById('shortcuts-modal');
+  const list = document.getElementById('shortcuts-list');
+  if (!modal || !list) return;
+
+  list.innerHTML = '';
+  for (const s of getShortcutList()) {
+    const row = document.createElement('div');
+    row.className = 'shortcut-row';
+    const desc = document.createElement('span');
+    desc.textContent = s.description;
+    const kbd = document.createElement('kbd');
+    kbd.textContent = s.keys;
+    row.append(desc, kbd);
+    list.appendChild(row);
+  }
+  modal.classList.remove('hidden');
 }
 
 // Toast notification
