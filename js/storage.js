@@ -13,6 +13,22 @@ async function getLZ() {
 
 const PREFIX = 'jsmess_mess_';
 
+// Self-initiated hash writes (save/share) must not trigger the global
+// hashchange re-import, which would reset editor content and cursor.
+let suppressNextHashChange = false;
+
+export function setHashSilently(hash) {
+  if (window.location.hash === '#' + hash) return; // no event will fire
+  suppressNextHashChange = true;
+  window.location.hash = hash;
+}
+
+export function consumeHashChangeSuppression() {
+  const suppressed = suppressNextHashChange;
+  suppressNextHashChange = false;
+  return suppressed;
+}
+
 export function generateId() {
   return Math.random().toString(36).substring(2, 10);
 }
@@ -51,7 +67,7 @@ export function saveMess(title) {
   }
 
   localStorage.setItem(PREFIX + id, JSON.stringify(data));
-  window.location.hash = `id=${id}`;
+  setHashSilently(`id=${id}`);
   return id;
 }
 
