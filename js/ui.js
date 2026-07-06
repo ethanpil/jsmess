@@ -86,6 +86,9 @@ export function initUI() {
       const expSelector = document.getElementById('mess-expiration');
       if (expSelector) expSelector.value = String(get('expiration') || 0);
     }
+    if (detail.key === 'theme') {
+      updateThemeIcon();
+    }
   });
 }
 
@@ -150,8 +153,7 @@ function setupToolbarActions() {
   const themeBtn = document.getElementById('btn-theme');
   if (themeBtn) {
     themeBtn.addEventListener('click', () => {
-      toggleTheme();
-      updateThemeIcon();
+      toggleTheme(); // icon updates via the theme state-change listener
     });
   }
 

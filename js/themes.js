@@ -17,10 +17,14 @@ export function initTheme() {
     setState('theme', prefersDark ? 'dark' : 'light');
   }
 
-  // Listen for system theme changes
+  // Listen for system theme changes (only while following the system, i.e.
+  // no explicit user choice saved). Keep state in sync so isDark() and the
+  // toolbar icon reflect the new theme.
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
     if (!localStorage.getItem(THEME_KEY)) {
-      applyTheme(e.matches ? 'dark' : 'light');
+      const next = e.matches ? 'dark' : 'light';
+      applyTheme(next);
+      setState('theme', next);
     }
   });
 }
