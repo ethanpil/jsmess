@@ -306,12 +306,13 @@ export async function exportStaticSite(onProgress, signal) {
   }
 
   const title = get('title') || 'Untitled';
+  const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title}</title>
+  <title>${safeTitle}</title>
   <link rel="stylesheet" href="style.css">
 ${libTags}
 ${headScript}
