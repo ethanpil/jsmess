@@ -209,10 +209,12 @@ async function handleFormat() {
   }
 }
 
-function setupToolsDropdown() {
-  const dropdown = document.getElementById('tools-dropdown');
+// Generic toolbar dropdown: button toggles the menu, any click elsewhere
+// closes it, and [data-action] items invoke onAction.
+function setupDropdown(dropdownId, buttonId, onAction) {
+  const dropdown = document.getElementById(dropdownId);
   if (!dropdown) return;
-  const btn = document.getElementById('btn-tools');
+  const btn = document.getElementById(buttonId);
   const menu = dropdown.querySelector('.toolbar-dropdown-menu');
 
   btn.addEventListener('click', (e) => {
@@ -229,8 +231,12 @@ function setupToolsDropdown() {
     const action = e.target.closest('[data-action]');
     if (!action) return;
     menu.classList.remove('open');
-    handleToolAction(action.dataset.action);
+    onAction(action.dataset.action);
   });
+}
+
+function setupToolsDropdown() {
+  setupDropdown('tools-dropdown', 'btn-tools', handleToolAction);
 }
 
 async function handleToolAction(action) {
@@ -824,27 +830,7 @@ function closeAllDropdowns() {
 
 // Export dropdown
 function setupExportDropdown() {
-  const dropdown = document.getElementById('export-dropdown');
-  if (!dropdown) return;
-  const btn = document.getElementById('btn-export');
-  const menu = dropdown.querySelector('.toolbar-dropdown-menu');
-
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeAllDropdowns();
-    menu.classList.toggle('open');
-  });
-
-  document.addEventListener('click', () => {
-    menu.classList.remove('open');
-  });
-
-  menu.addEventListener('click', (e) => {
-    const action = e.target.closest('[data-action]');
-    if (!action) return;
-    menu.classList.remove('open');
-    handleExportAction(action.dataset.action);
-  });
+  setupDropdown('export-dropdown', 'btn-export', handleExportAction);
 }
 
 async function handleExportAction(action) {
@@ -884,27 +870,7 @@ async function handleExportAction(action) {
 
 // Import dropdown
 function setupImportDropdown() {
-  const dropdown = document.getElementById('import-dropdown');
-  if (!dropdown) return;
-  const btn = document.getElementById('btn-import');
-  const menu = dropdown.querySelector('.toolbar-dropdown-menu');
-
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeAllDropdowns();
-    menu.classList.toggle('open');
-  });
-
-  document.addEventListener('click', () => {
-    menu.classList.remove('open');
-  });
-
-  menu.addEventListener('click', (e) => {
-    const action = e.target.closest('[data-action]');
-    if (!action) return;
-    menu.classList.remove('open');
-    handleImportAction(action.dataset.action);
-  });
+  setupDropdown('import-dropdown', 'btn-import', handleImportAction);
 }
 
 async function handleImportAction(action) {
