@@ -974,8 +974,10 @@ async function handleImportAction(action) {
         const controller = new AbortController();
         showProgress('Restoring Backup...', controller);
         try {
-          restoreFullBackup(backupData, updateProgress, controller.signal);
-          showToast(`Restored ${count} mess(es)!`);
+          const result = restoreFullBackup(backupData, updateProgress, controller.signal);
+          showToast(result.skipped > 0
+            ? `Restored ${result.restored} mess(es), skipped ${result.skipped} malformed entr${result.skipped === 1 ? 'y' : 'ies'}`
+            : `Restored ${result.restored} mess(es)!`);
         } catch (err) {
           if (err.name !== 'AbortError') showToast('Restore failed: ' + err.message);
         } finally {

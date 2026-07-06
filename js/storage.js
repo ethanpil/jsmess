@@ -416,15 +416,24 @@ export function parseBackupFile(file) {
   });
 }
 
-// Restore a full backup into localStorage
+// Restore a full backup into localStorage. Skips malformed entries
+// (no string id) instead of writing jsmess_mess_undefined keys.
+// Returns { restored, skipped }.
 export function restoreFullBackup(backupData, onProgress, signal) {
   onProgress('Restoring messes...', 20);
 
   const total = backupData.messes.length;
+  let restored = 0;
+  let skipped = 0;
   for (let i = 0; i < total; i++) {
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
     const mess = backupData.messes[i];
+    if (!mess || typeof mess.id !== 'string' || !mess.id) {
+      skipped++;
+      continue;
+    }
     localStorage.setItem(PREFIX + mess.id, JSON.stringify(mess));
+    restored++;
     onProgress(`Restoring mess ${i + 1} of ${total}...`, 20 + (i / total) * 60);
   }
 
@@ -432,11 +441,16 @@ export function restoreFullBackup(backupData, onProgress, signal) {
   if (backupData.config) {
     for (const [key, value] of Object.entries(backupData.config)) {
       if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
-      localStorage.setItem(key, value);
+      // Only restore our own config keys — a crafted backup must not be
+      // able to write arbitrary localStorage entries.
+      if (typeof key === 'string' && key.startsWith('jsmess_') && typeof value === 'string') {
+        localStorage.setItem(key, value);
+      }
     }
   }
 
   onProgress('Done!', 100);
+  return { restored, skipped };
 }
 
 // Clean up expired messes from localStorage
