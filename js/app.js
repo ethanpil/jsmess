@@ -6,8 +6,11 @@ import { initLayout } from './layout.js';
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './themes.js';
 import { initUI, showToast, updateLastCleanupDisplay } from './ui.js';
-import { importFromHash, cleanupExpiredMesses, getLastCleanupDate, consumeHashChangeSuppression } from './storage.js';
-import { isDirty } from './state.js';
+import {
+  importFromHash, cleanupExpiredMesses, getLastCleanupDate, consumeHashChangeSuppression,
+  saveDraft, loadDraftData, restoreDraft, clearDraft,
+} from './storage.js';
+import { isDirty, onStateChange } from './state.js';
 import { run, preloadSass } from './preview.js';
 
 let initialized = false;
@@ -32,6 +35,7 @@ async function init() {
 
   // Load content before layout so Split.js sizes correctly
   const loaded = await importFromHash();
+  if (!loaded) maybeRestoreDraft();
 
   initLayout();
   initShortcuts();
@@ -61,6 +65,9 @@ async function init() {
     run();
   });
 
+  // Auto-save a recovery draft while there are unsaved changes
+  initDraftAutoSave();
+
   // Warn before closing the tab with unsaved changes
   window.addEventListener('beforeunload', (e) => {
     if (isDirty()) {
@@ -73,6 +80,32 @@ async function init() {
   initIdleCleanup();
 
   console.log('JSMess initialized');
+}
+
+// Offer to bring back unsaved work from the last session. Declining
+// discards the draft so the prompt doesn't nag on every load.
+function maybeRestoreDraft() {
+  const draft = loadDraftData();
+  if (!draft) return;
+  const when = draft.savedAt ? new Date(draft.savedAt).toLocaleString() : 'your last session';
+  if (confirm(`Restore your unsaved draft from ${when}?`)) {
+    restoreDraft();
+  } else {
+    clearDraft();
+  }
+}
+
+const DRAFT_SAVE_DELAY_MS = 2000;
+
+function initDraftAutoSave() {
+  let timer = null;
+  onStateChange((detail) => {
+    if (detail.key !== 'html' && detail.key !== 'css' && detail.key !== 'js') return;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (isDirty()) saveDraft();
+    }, DRAFT_SAVE_DELAY_MS);
+  });
 }
 
 // Shown when the CodeMirror CDN modules can't be fetched (offline/blocked).
