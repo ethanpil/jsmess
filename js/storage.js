@@ -3,6 +3,7 @@
 import { getState, setMultiple, get, setDirty } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
+import { escapeHtml } from './util.js';
 
 // Lazy-loaded — only needed for shared links (code= hash) and share export
 let _lz = null;
@@ -305,7 +306,7 @@ export async function exportStaticSite(onProgress, signal) {
   }
 
   const title = get('title') || 'Untitled';
-  const safeTitle = title.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const safeTitle = escapeHtml(title);
   const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>

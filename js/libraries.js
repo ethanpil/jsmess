@@ -1,19 +1,7 @@
 // JSMess Libraries - simple URL-based external library management
 
 import { get, setState } from './state.js';
-
-// Infer type from URL extension. Returns 'js', 'css', or null.
-export function inferTypeFromUrl(url) {
-  try {
-    const path = new URL(url, 'https://x/').pathname.toLowerCase();
-    const ext = path.slice(path.lastIndexOf('.'));
-    if (ext === '.css') return 'css';
-    if (ext === '.js' || ext === '.mjs' || ext === '.cjs') return 'js';
-  } catch (_) {
-    // ignore
-  }
-  return null;
-}
+import { inferTypeFromUrl } from './util.js';
 
 export function addLibrary(url) {
   const trimmed = url.trim();

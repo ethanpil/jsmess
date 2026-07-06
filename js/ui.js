@@ -32,6 +32,7 @@ import { setLayout, getLayoutOptions } from './layout.js';
 import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
 import { undo, redo } from './cm.js';
 import { getPref, setPref } from './prefs.js';
+import { escapeHtml, filenameFromUrl } from './util.js';
 
 // Console rendering: entries are buffered and flushed once per animation
 // frame, and only the newest MAX_CONSOLE_ENTRIES stay in the DOM — a user
@@ -637,15 +638,6 @@ function setupLibraryInput() {
   });
 }
 
-function filenameFromUrl(url) {
-  try {
-    const path = new URL(url, 'https://x/').pathname;
-    return path.split('/').pop() || url;
-  } catch (_) {
-    return url;
-  }
-}
-
 function updateLibraryList() {
   const container = document.getElementById('library-list');
   if (!container) return;
@@ -815,12 +807,6 @@ export function showToast(message) {
   toast._timer = setTimeout(() => {
     toast.style.opacity = '0';
   }, 2000);
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
 }
 
 function updateThemeIcon() {
