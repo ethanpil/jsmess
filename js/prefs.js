@@ -10,6 +10,7 @@
 const KEYS = {
   theme: 'jsmess_theme',
   layout: 'jsmess_layout',
+  autoRun: 'jsmess_autoRun',
   styleType: 'jsmess_styleType',
   lineNumbers: 'jsmess_lineNumbers',
   minimap: 'jsmess_minimap',
