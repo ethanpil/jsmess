@@ -13,8 +13,11 @@ function notifyConsole(entry) {
   for (const cb of consoleListeners) cb(entry);
 }
 
-// Listen for postMessage from iframe
+// Listen for postMessage from iframe — only from the preview frame itself,
+// so other windows (or nested frames inside user content) can't spoof entries.
 window.addEventListener('message', (e) => {
+  const frame = document.getElementById('preview-frame');
+  if (!frame || e.source !== frame.contentWindow) return;
   if (e.data && e.data.type === 'console') {
     notifyConsole({
       method: e.data.method,
