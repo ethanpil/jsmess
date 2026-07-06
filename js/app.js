@@ -18,7 +18,14 @@ async function init() {
   initTheme();
 
   // Phase 2: load CodeMirror modules, then initialize everything
-  await initCM();
+  try {
+    await initCM();
+  } catch (e) {
+    console.error('Failed to load editor modules:', e);
+    initialized = false; // allow a retry to re-enter init
+    showLoadError();
+    return;
+  }
 
   initEditors();
 
@@ -57,6 +64,40 @@ async function init() {
   initIdleCleanup();
 
   console.log('JSMess initialized');
+}
+
+// Shown when the CodeMirror CDN modules can't be fetched (offline/blocked).
+// Without this the loading skeleton animates forever with no explanation.
+function showLoadError() {
+  const appEl = document.getElementById('app');
+  if (appEl) appEl.classList.remove('loading');
+
+  if (document.getElementById('load-error')) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'load-error';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; background: var(--bg-primary, #fff); color: var(--text-primary, #222);
+    font-family: system-ui, sans-serif; text-align: center; padding: 20px;
+  `;
+  overlay.innerHTML = `
+    <div style="font-size:17px;font-weight:600;">Couldn&rsquo;t load the editor</div>
+    <div style="font-size:13px;max-width:420px;color:var(--text-secondary,#666);">
+      JSMess needs a network connection to fetch its editor modules.
+      Check your connection and try again.
+    </div>
+  `;
+  const retry = document.createElement('button');
+  retry.textContent = 'Retry';
+  retry.style.cssText = `
+    padding: 6px 22px; font-size: 13px; cursor: pointer; border-radius: 6px;
+    border: 1px solid var(--border, #ccc); background: var(--bg-secondary, #f5f5f5);
+    color: inherit;
+  `;
+  retry.addEventListener('click', () => window.location.reload());
+  overlay.appendChild(retry);
+  document.body.appendChild(overlay);
 }
 
 function initIdleCleanup() {
