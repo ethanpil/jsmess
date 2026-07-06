@@ -149,6 +149,8 @@
             <button data-action="tabs-to-spaces"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="3 9 6 12 3 15"/></svg>Tabs to Spaces</button>
             <button data-action="spaces-to-tabs"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="7 9 4 12 7 15"/></svg>Spaces to Tabs</button>
             <hr>
+            <button data-action="shortcuts"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h0M10 10h0M14 10h0M18 10h0M6 14h0M18 14h0M9 14h6"/></svg>Keyboard Shortcuts</button>
+            <hr>
             <button data-action="uppercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L12 4l4 16h4M6 14h12"/></svg>UPPERCASE (Selection)</button>
             <button data-action="lowercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="5"/><path d="M14 10v10"/></svg>lowercase (Selection)</button>
             <button data-action="propercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h5L12 6l4 14h5M5 14h10"/></svg>Proper Case (Selection)</button>
@@ -393,6 +395,13 @@
     </div>
 
     <div class="settings-section">
+      <button id="btn-show-shortcuts" class="shortcuts-link" title="Show keyboard shortcuts">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
+        JSMess Keyboard Shortcuts
+      </button>
+    </div>
+
+    <div class="settings-section">
       <h3>About</h3>
       <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;">JSMess is an open source (MIT License) code playground.</p>
       <p style="font-size:12px;color:var(--text-secondary);line-height:1.6;">Logo by <a href="https://www.figma.com/community/file/1166831539721848736?ref=svgrepo.com" target="_blank">Solar Icons</a> via CC Attribution License</p>
@@ -416,6 +425,20 @@
         <div class="progress-bar-track">
           <div id="progress-bar" class="progress-bar-fill" style="width:0%"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="shortcuts-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <span>Keyboard Shortcuts</span>
+        <button id="shortcuts-modal-close" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="shortcuts-list" class="shortcuts-list"></div>
+        <p class="shortcuts-note">Standard editor shortcuts (undo, find, fold, toggle comment&hellip;) also work inside each editor.</p>
       </div>
     </div>
   </div>

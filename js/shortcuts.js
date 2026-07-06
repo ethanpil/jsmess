@@ -5,8 +5,13 @@ import { focusEditor } from './editors.js';
 
 const shortcuts = [];
 
-function registerShortcut(key, ctrl, shift, callback, description) {
-  shortcuts.push({ key: key.toLowerCase(), ctrl, shift, callback, description });
+const IS_MAC = /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent);
+const MOD_LABEL = IS_MAC ? '⌘' : 'Ctrl';
+
+// notInEditor: skip the shortcut while typing in an editor or form field —
+// needed for bindings without a modifier key (e.g. '?').
+function registerShortcut(key, ctrl, shift, callback, description, notInEditor = false) {
+  shortcuts.push({ key: key.toLowerCase(), ctrl, shift, callback, description, notInEditor });
 }
 
 export function initShortcuts() {
@@ -40,7 +45,20 @@ export function initShortcuts() {
     focusEditor('js');
   }, 'Focus JS editor');
 
+  // ? → Show shortcut help (outside the editors; Cmd/Ctrl+/ is taken by
+  // CodeMirror's toggle-comment inside them)
+  registerShortcut('?', false, true, () => {
+    document.dispatchEvent(new CustomEvent('action-show-shortcuts'));
+  }, 'Show keyboard shortcuts (when not typing in an editor)', true);
+
   document.addEventListener('keydown', handleKeydown);
+}
+
+function isEditableTarget(el) {
+  if (!el || !el.closest) return false;
+  if (el.closest('.cm-editor')) return true;
+  const tag = el.tagName;
+  return el.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
 }
 
 function handleKeydown(e) {
@@ -52,6 +70,7 @@ function handleKeydown(e) {
       shortcut.ctrl === isMod &&
       shortcut.shift === e.shiftKey
     ) {
+      if (shortcut.notInEditor && isEditableTarget(e.target)) return;
       e.preventDefault();
       shortcut.callback();
       return;
@@ -60,8 +79,17 @@ function handleKeydown(e) {
 }
 
 export function getShortcutList() {
-  return shortcuts.map((s) => ({
-    keys: `${s.ctrl ? 'Ctrl+' : ''}${s.shift ? 'Shift+' : ''}${s.key}`,
-    description: s.description,
-  }));
+  return shortcuts.map((s) => {
+    let keys;
+    if (!s.ctrl && s.shift && s.key.length === 1) {
+      // A shifted character key displays as the character itself ('?')
+      keys = s.key;
+    } else {
+      const key = s.key.length === 1
+        ? s.key.toUpperCase()
+        : s.key.charAt(0).toUpperCase() + s.key.slice(1);
+      keys = `${s.ctrl ? MOD_LABEL + '+' : ''}${s.shift ? 'Shift+' : ''}${key}`;
+    }
+    return { keys, description: s.description };
+  });
 }
