@@ -845,22 +845,3 @@
   color: var(--text-muted);
   line-height: 1.5;
 }
-
-/* Compact "JSMess Keyboard Shortcuts" link in the settings drawer */
-.shortcuts-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  background: var(--bg-tertiary);
-  cursor: pointer;
-}
-
-.shortcuts-link:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}

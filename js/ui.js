@@ -450,11 +450,6 @@ function toggleSettings() {
   if (overlay) overlay.classList.toggle('open');
 }
 
-function closeSettings() {
-  document.getElementById('settings-drawer')?.classList.remove('open');
-  document.getElementById('settings-overlay')?.classList.remove('open');
-}
-
 // Mess title input
 function setupMessTitle() {
   const input = document.getElementById('mess-title');
@@ -862,14 +857,10 @@ function setupShortcutsModal() {
 
   document.addEventListener('action-show-shortcuts', openShortcutsModal);
 
-  // Link in the settings drawer — close the drawer so the modal isn't
-  // stacked behind it
-  const drawerBtn = document.getElementById('btn-show-shortcuts');
-  if (drawerBtn) {
-    drawerBtn.addEventListener('click', () => {
-      closeSettings();
-      openShortcutsModal();
-    });
+  // Toolbar keyboard icon (left of the settings gear)
+  const toolbarBtn = document.getElementById('btn-show-shortcuts');
+  if (toolbarBtn) {
+    toolbarBtn.addEventListener('click', openShortcutsModal);
   }
 }
 
