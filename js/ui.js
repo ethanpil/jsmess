@@ -73,7 +73,7 @@ export function initUI() {
       updateLibraryList();
     }
     if (detail.key === 'styleType' || detail.bulk) {
-      const styleType = get('styleType') || 'sass';
+      const styleType = get('styleType') || 'css';
       updateCssPanelLabel(styleType);
       const selector = document.getElementById('style-type');
       if (selector) selector.value = styleType;
@@ -448,7 +448,7 @@ function setupStyleTypeSelector() {
   const selector = document.getElementById('style-type');
   if (!selector) return;
 
-  const saved = localStorage.getItem(STYLETYPE_KEY) || 'sass';
+  const saved = localStorage.getItem(STYLETYPE_KEY) || 'css';
   setState('styleType', saved);
   selector.value = saved;
   updateCssPanelLabel(saved);
