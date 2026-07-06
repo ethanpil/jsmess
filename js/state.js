@@ -14,6 +14,17 @@ const state = {
   theme: null, // null = system, 'light', 'dark'
 };
 
+// Unsaved-changes tracking: content edits set the flag, save/load clear it.
+let dirty = false;
+
+export function isDirty() {
+  return dirty;
+}
+
+export function setDirty(value) {
+  dirty = value;
+}
+
 export function getState() {
   return { ...state };
 }
@@ -24,6 +35,7 @@ export function get(key) {
 
 export function setState(key, value) {
   state[key] = value;
+  if (key === 'html' || key === 'css' || key === 'js') dirty = true;
   document.dispatchEvent(new CustomEvent('state-change', { detail: { key, value } }));
 }
 

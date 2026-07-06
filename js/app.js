@@ -7,6 +7,7 @@ import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './themes.js';
 import { initUI, showToast, updateLastCleanupDisplay } from './ui.js';
 import { importFromHash, cleanupExpiredMesses, getLastCleanupDate, consumeHashChangeSuppression } from './storage.js';
+import { isDirty } from './state.js';
 import { run, preloadSass } from './preview.js';
 
 let initialized = false;
@@ -58,6 +59,14 @@ async function init() {
     if (consumeHashChangeSuppression()) return;
     await importFromHash();
     run();
+  });
+
+  // Warn before closing the tab with unsaved changes
+  window.addEventListener('beforeunload', (e) => {
+    if (isDirty()) {
+      e.preventDefault();
+      e.returnValue = ''; // required by Chrome to show the prompt
+    }
   });
 
   // Idle auto-cleanup: run once per day after 30s of inactivity

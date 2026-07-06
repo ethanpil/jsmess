@@ -1,6 +1,6 @@
 // JSMess UI - Toolbar, settings drawer, modals, console panel
 
-import { get, setState, onStateChange } from './state.js';
+import { get, setState, onStateChange, isDirty } from './state.js';
 import { run, onConsoleMessage } from './preview.js';
 import { formatAll } from './format.js';
 import { toggleTheme, isDark } from './themes.js';
@@ -770,6 +770,9 @@ function openMessesModal() {
         </div>
       `;
       item.querySelector('.load').addEventListener('click', () => {
+        if (isDirty() && !confirm('You have unsaved changes that will be lost. Load anyway?')) {
+          return;
+        }
         loadMess(f.id);
         closeMessesModal();
         run();
