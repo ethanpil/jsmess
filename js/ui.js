@@ -60,6 +60,7 @@ export function initUI() {
   setupExpirationSelector();
   setupCleanupButton();
   setupLayoutSelector();
+  setupAutoRunToggle();
   setupLineNumbersToggle();
   setupMinimapToggle();
   setupIndentSettings();
@@ -531,6 +532,35 @@ function setupLayoutSelector() {
   selector.value = get('layout');
   selector.addEventListener('change', () => {
     setLayout(selector.value);
+  });
+}
+
+// Auto Run: debounce content changes, then re-run the preview
+const AUTO_RUN_DELAY_MS = 800;
+
+function setupAutoRunToggle() {
+  const toggle = document.getElementById('auto-run-toggle');
+  if (!toggle) return;
+
+  toggle.checked = getPref('autoRun') === 'true';
+
+  let timer = null;
+  const scheduleRun = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => run(), AUTO_RUN_DELAY_MS);
+  };
+
+  toggle.addEventListener('change', () => {
+    setPref('autoRun', toggle.checked);
+    if (toggle.checked) scheduleRun(); // immediate feedback on enable
+    else clearTimeout(timer);
+  });
+
+  onStateChange((detail) => {
+    if (!toggle.checked) return;
+    if (detail.key === 'html' || detail.key === 'css' || detail.key === 'js') {
+      scheduleRun();
+    }
   });
 }
 
