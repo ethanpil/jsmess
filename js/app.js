@@ -6,7 +6,7 @@ import { initLayout } from './layout.js';
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './themes.js';
 import { initUI, showToast, updateLastCleanupDisplay } from './ui.js';
-import { importFromHash, cleanupExpiredMesses, getLastCleanupDate } from './storage.js';
+import { importFromHash, cleanupExpiredMesses, getLastCleanupDate, consumeHashChangeSuppression } from './storage.js';
 import { run, preloadSass } from './preview.js';
 
 let initialized = false;
@@ -46,8 +46,9 @@ async function init() {
     setTimeout(() => preloadSass(), 2000);
   }
 
-  // Listen for hash changes
+  // Listen for hash changes (skip ones we caused ourselves via save/share)
   window.addEventListener('hashchange', async () => {
+    if (consumeHashChangeSuppression()) return;
     await importFromHash();
     run();
   });

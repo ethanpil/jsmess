@@ -20,6 +20,7 @@ import {
   restoreFullBackup,
   cleanupExpiredMesses,
   getLastCleanupDate,
+  setHashSilently,
 } from './storage.js';
 import {
   addLibrary,
@@ -136,7 +137,7 @@ function setupToolbarActions() {
   if (shareBtn) {
     shareBtn.addEventListener('click', async () => {
       const hash = await exportToHash();
-      window.location.hash = hash;
+      setHashSilently(hash);
       navigator.clipboard.writeText(window.location.href).then(() => {
         showToast('Link copied to clipboard!');
       }).catch(() => {
