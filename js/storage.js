@@ -1,6 +1,6 @@
 // JSMess Storage - localStorage + URL hash (LZ-String)
 
-import { getState, setMultiple, get } from './state.js';
+import { getState, setMultiple, get, setDirty } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
 
@@ -68,6 +68,7 @@ export function saveMess(title) {
 
   localStorage.setItem(PREFIX + id, JSON.stringify(data));
   setHashSilently(`id=${id}`);
+  setDirty(false);
   return id;
 }
 
@@ -92,6 +93,7 @@ export function loadMess(id) {
     setContent('html', data.html || '');
     setContent('css', data.css || '');
     setContent('js', data.js || '');
+    setDirty(false);
     return true;
   } catch (e) {
     console.error('Failed to load mess:', e);
@@ -204,6 +206,7 @@ export async function importFromHash() {
       setContent('html', data.h || '');
       setContent('css', data.c || '');
       setContent('js', data.j || '');
+      setDirty(false);
       return true;
     } catch (e) {
       console.error('Failed to import from hash:', e);
@@ -257,6 +260,7 @@ export function importFromFile(file) {
         setContent('html', data.html || '');
         setContent('css', data.css || '');
         setContent('js', data.js || '');
+        setDirty(false);
         resolve(true);
       } catch (e) {
         reject(e);
