@@ -1,6 +1,7 @@
 // JSMess Preview - iframe srcdoc + console capture
 
 import { get } from './state.js';
+import { escapeHtml, escapeScriptEnd } from './util.js';
 
 let sassModule = null;
 const consoleListeners = [];
@@ -162,13 +163,3 @@ export function preloadSass() {
   }
 }
 
-// A literal </script> inside user JS (e.g. in a string) would terminate the
-// inline script tag and corrupt the srcdoc document. <\/script is equivalent
-// inside JS strings/regex, so this is safe to apply to the whole source.
-function escapeScriptEnd(code) {
-  return code.replace(/<\/script/gi, '<\\/script');
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
