@@ -130,8 +130,13 @@ function setupToolbarActions() {
   const forkBtn = document.getElementById('btn-fork');
   if (forkBtn) {
     forkBtn.addEventListener('click', () => {
-      forkMess();
-      showToast('Forked!');
+      try {
+        forkMess();
+        showToast('Forked!');
+      } catch (e) {
+        console.error('Fork failed:', e);
+        showToast('Fork failed — storage may be full. Export or clean up old messes.');
+      }
     });
   }
 
@@ -173,8 +178,14 @@ function setupToolbarActions() {
 }
 
 function handleSave() {
-  saveMess(get('title'));
-  showToast('Saved!');
+  try {
+    saveMess(get('title'));
+    showToast('Saved!');
+  } catch (e) {
+    // localStorage.setItem throws when the quota is exceeded
+    console.error('Save failed:', e);
+    showToast('Save failed — storage may be full. Export or clean up old messes.');
+  }
 }
 
 async function handleFormat() {
