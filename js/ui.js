@@ -71,7 +71,11 @@ export function initUI() {
     }
     if (detail.key === 'title' || detail.bulk) {
       const titleInput = document.getElementById('mess-title');
-      if (titleInput) titleInput.value = get('title') || 'Untitled';
+      // Don't echo state back into the input while the user is typing in it —
+      // the trimmed value would delete the space they just typed.
+      if (titleInput && document.activeElement !== titleInput) {
+        titleInput.value = get('title') || 'Untitled';
+      }
     }
     if (detail.key === 'wrapMode' || detail.bulk) {
       const wrapSelector = document.getElementById('wrap-mode');
@@ -352,6 +356,11 @@ function setupMessTitle() {
     const value = input.value.trim() || 'Untitled';
     setState('title', value);
     updateMessTitle(value);
+  });
+
+  // Normalize the displayed value to the trimmed state once editing ends
+  input.addEventListener('blur', () => {
+    input.value = get('title') || 'Untitled';
   });
 }
 
