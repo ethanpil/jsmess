@@ -3,13 +3,12 @@
 import Split from 'split.js';
 import { get, setState } from './state.js';
 import { refreshEditors, focusEditor } from './editors.js';
+import { getPref, setPref } from './prefs.js';
 
 let splits = [];
 
-const LAYOUT_KEY = 'jsmess_layout';
-
 export function initLayout() {
-  const saved = localStorage.getItem(LAYOUT_KEY);
+  const saved = getPref('layout');
   if (saved) setState('layout', saved);
 
   applyLayout(get('layout'));
@@ -17,7 +16,7 @@ export function initLayout() {
 
 export function setLayout(layout) {
   setState('layout', layout);
-  localStorage.setItem(LAYOUT_KEY, layout);
+  setPref('layout', layout);
   applyLayout(layout);
 }
 

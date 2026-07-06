@@ -31,6 +31,7 @@ import {
 import { setLayout, getLayoutOptions } from './layout.js';
 import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType } from './editors.js';
 import { undo, redo } from './cm.js';
+import { getPref, setPref } from './prefs.js';
 
 // Console rendering: entries are buffered and flushed once per animation
 // frame, and only the newest MAX_CONSOLE_ENTRIES stay in the DOM — a user
@@ -442,20 +443,18 @@ function setupMessTitle() {
 }
 
 // Style type selector
-const STYLETYPE_KEY = 'jsmess_styleType';
-
 function setupStyleTypeSelector() {
   const selector = document.getElementById('style-type');
   if (!selector) return;
 
-  const saved = localStorage.getItem(STYLETYPE_KEY) || 'css';
+  const saved = getPref('styleType') || 'css';
   setState('styleType', saved);
   selector.value = saved;
   updateCssPanelLabel(saved);
 
   selector.addEventListener('change', () => {
     const value = selector.value;
-    localStorage.setItem(STYLETYPE_KEY, value);
+    setPref('styleType', value);
     setState('styleType', value);
     updateCssPanelLabel(value);
   });
@@ -529,60 +528,51 @@ function setupLayoutSelector() {
 }
 
 // Line numbers toggle
-const LINENUMBERS_KEY = 'jsmess_lineNumbers';
-
 function setupLineNumbersToggle() {
   const toggle = document.getElementById('line-numbers-toggle');
   if (!toggle) return;
 
-  toggle.checked = localStorage.getItem(LINENUMBERS_KEY) !== 'false';
+  toggle.checked = getPref('lineNumbers') !== 'false';
   toggle.addEventListener('change', () => {
     const show = toggle.checked;
-    localStorage.setItem(LINENUMBERS_KEY, show);
+    setPref('lineNumbers', show);
     setLineNumbers(show);
   });
 }
 
 // Minimap toggle
-const MINIMAP_KEY = 'jsmess_minimap';
-
 function setupMinimapToggle() {
   const toggle = document.getElementById('minimap-toggle');
   if (!toggle) return;
 
-  toggle.checked = localStorage.getItem(MINIMAP_KEY) === 'true';
+  toggle.checked = getPref('minimap') === 'true';
   toggle.addEventListener('change', () => {
     const show = toggle.checked;
-    localStorage.setItem(MINIMAP_KEY, show);
+    setPref('minimap', show);
     setMinimap(show);
   });
 }
 
 // Indent settings
-const INDENT_TYPE_KEY = 'jsmess_indentType';
-const INDENT_SIZE_KEY = 'jsmess_indentSize';
-
 function setupIndentSettings() {
   const typeSelector = document.getElementById('indent-type');
   const sizeSelector = document.getElementById('indent-size');
   if (!typeSelector || !sizeSelector) return;
 
-  const savedType = localStorage.getItem(INDENT_TYPE_KEY) || 'spaces';
-  const savedSize = localStorage.getItem(INDENT_SIZE_KEY) || '2';
-  typeSelector.value = savedType;
-  sizeSelector.value = savedSize;
+  typeSelector.value = getPref('indentType') || 'spaces';
+  sizeSelector.value = getPref('indentSize') || '2';
   updateIndentSizeState(typeSelector, sizeSelector);
 
   typeSelector.addEventListener('change', () => {
     const type = typeSelector.value;
-    localStorage.setItem(INDENT_TYPE_KEY, type);
+    setPref('indentType', type);
     updateIndentSizeState(typeSelector, sizeSelector);
     setIndentation(type, parseInt(sizeSelector.value, 10));
   });
 
   sizeSelector.addEventListener('change', () => {
     const size = sizeSelector.value;
-    localStorage.setItem(INDENT_SIZE_KEY, size);
+    setPref('indentSize', size);
     setIndentation(typeSelector.value, parseInt(size, 10));
   });
 }
@@ -594,17 +584,14 @@ function updateIndentSizeState(typeSelector, sizeSelector) {
 }
 
 // Font settings
-const FONT_KEY = 'jsmess_editorFont';
-const FONT_SIZE_KEY = 'jsmess_fontSize';
-
 function setupFontSettings() {
   const fontSelector = document.getElementById('editor-font');
   const sizeSlider = document.getElementById('font-size');
   const sizeValue = document.getElementById('font-size-value');
   if (!fontSelector || !sizeSlider) return;
 
-  const savedFont = localStorage.getItem(FONT_KEY) || 'Source Code Pro';
-  const savedSize = localStorage.getItem(FONT_SIZE_KEY) || '13';
+  const savedFont = getPref('editorFont') || 'Source Code Pro';
+  const savedSize = getPref('fontSize') || '13';
   fontSelector.value = savedFont;
   sizeSlider.value = savedSize;
   if (sizeValue) sizeValue.textContent = savedSize + 'px';
@@ -618,14 +605,14 @@ function setupFontSettings() {
   }, { once: true });
 
   fontSelector.addEventListener('change', () => {
-    localStorage.setItem(FONT_KEY, fontSelector.value);
+    setPref('editorFont', fontSelector.value);
     setEditorFont(fontSelector.value, parseInt(sizeSlider.value, 10));
   });
 
   sizeSlider.addEventListener('input', () => {
     const size = sizeSlider.value;
     if (sizeValue) sizeValue.textContent = size + 'px';
-    localStorage.setItem(FONT_SIZE_KEY, size);
+    setPref('fontSize', size);
     setEditorFont(fontSelector.value, parseInt(size, 10));
   });
 }
