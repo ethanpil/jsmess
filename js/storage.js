@@ -4,8 +4,48 @@ import { getState, setMultiple, get, setDirty } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
 import { escapeHtml } from './util.js';
+// Cyclic with ui.js (which imports this module) — safe because showToast is a
+// hoisted function declaration and neither module calls the other at top level.
+import { showToast } from './ui.js';
 
 const PREFIX = 'jsmess_mess_';
+
+// ---- Mess normalization ----------------------------------------------
+// The single source of truth for the per-mess fields and their defaults.
+// Every serialization surface (localStorage records, .jsmess files, share
+// links, drafts) encodes and decodes through this helper — add new per-mess
+// fields HERE, not at the call sites. See docs/SHARE-FORMAT.md.
+
+const WRAP_MODES = ['onLoad', 'onDomReady', 'noWrapHead', 'noWrapBody'];
+
+function normalizeMess(raw, { titleFallback = 'Untitled' } = {}) {
+  const data = raw && typeof raw === 'object' ? raw : {};
+  const str = (v, fallback) => (typeof v === 'string' && v ? v : fallback);
+  const libraries = Array.isArray(data.libraries)
+    ? data.libraries
+        .filter((l) => l && typeof l.url === 'string')
+        .map((l) => ({ url: l.url, type: l.type === 'css' ? 'css' : 'js' }))
+    : [];
+  return {
+    title: str(data.title, titleFallback),
+    html: typeof data.html === 'string' ? data.html : '',
+    css: typeof data.css === 'string' ? data.css : '',
+    js: typeof data.js === 'string' ? data.js : '',
+    wrapMode: WRAP_MODES.includes(data.wrapMode) ? data.wrapMode : 'onLoad',
+    styleType: data.styleType === 'sass' ? 'sass' : 'css',
+    libraries,
+  };
+}
+
+// Apply a mess to state + editors (the decode-side counterpart).
+function applyMess(raw, { id = null, expiration = 0, titleFallback, dirty = false } = {}) {
+  const mess = normalizeMess(raw, { titleFallback });
+  setMultiple({ id, expiration, ...mess });
+  setContent('html', mess.html);
+  setContent('css', mess.css);
+  setContent('js', mess.js);
+  setDirty(dirty);
+}
 
 // ---- Share link codec ------------------------------------------------
 // Format: #code=<base64url(deflate-raw(UTF-8 JSON envelope))>
@@ -15,8 +55,15 @@ const PREFIX = 'jsmess_mess_';
 const SHARE_FORMAT_VERSION = 1;
 
 export function isCompressionSupported() {
-  return typeof CompressionStream !== 'undefined'
-      && typeof DecompressionStream !== 'undefined';
+  // Probe the actual format: some engines (Chromium 80-102) have the
+  // constructors but not 'deflate-raw', which throws TypeError here.
+  try {
+    new CompressionStream('deflate-raw');
+    new DecompressionStream('deflate-raw');
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 async function deflateRaw(text) {
@@ -48,15 +95,6 @@ function base64UrlToBytes(str) {
   return bytes;
 }
 
-// ui.js statically imports storage.js, so toast access goes through a
-// deferred dynamic import to avoid the static cycle.
-async function shareToast(message) {
-  try {
-    (await import('./ui.js')).showToast(message);
-  } catch (e) {
-    console.warn(message);
-  }
-}
 
 // Self-initiated hash writes (save/share) must not trigger the global
 // hashchange re-import, which would reset editor content and cursor.
@@ -88,13 +126,8 @@ export function saveMess(title) {
 
   const data = {
     id,
+    ...getCurrentMessData(),
     title: title || get('title') || 'Untitled',
-    html: get('html'),
-    css: get('css'),
-    js: get('js'),
-    wrapMode: get('wrapMode'),
-    styleType: get('styleType'),
-    libraries: get('libraries'),
     expiration: get('expiration') || 0,
     updatedAt: Date.now(),
   };
@@ -120,31 +153,10 @@ export function saveMess(title) {
 
 // Load mess from localStorage
 export function loadMess(id) {
-  const raw = localStorage.getItem(PREFIX + id);
-  if (!raw) return false;
-
-  try {
-    const data = JSON.parse(raw);
-    setMultiple({
-      id: data.id,
-      title: data.title || 'Untitled',
-      html: data.html || '',
-      css: data.css || '',
-      js: data.js || '',
-      wrapMode: data.wrapMode || 'onLoad',
-      styleType: data.styleType || 'sass',
-      libraries: data.libraries || [],
-      expiration: data.expiration || 0,
-    });
-    setContent('html', data.html || '');
-    setContent('css', data.css || '');
-    setContent('js', data.js || '');
-    setDirty(false);
-    return true;
-  } catch (e) {
-    console.error('Failed to load mess:', e);
-    return false;
-  }
+  const data = getSavedMessData(id);
+  if (!data) return false;
+  applyMess(data, { id: data.id || id, expiration: data.expiration || 0 });
+  return true;
 }
 
 // Fork: clone current state with new ID
@@ -200,15 +212,7 @@ export function listMesses() {
 
 // Current editor state, share-scope only (no expiration, no global prefs)
 export function getCurrentMessData() {
-  return {
-    title: get('title'),
-    html: get('html'),
-    css: get('css'),
-    js: get('js'),
-    wrapMode: get('wrapMode'),
-    styleType: get('styleType'),
-    libraries: get('libraries') || [],
-  };
+  return normalizeMess(getState());
 }
 
 // Full saved record for the My Messes share path (listMesses() only
@@ -228,35 +232,31 @@ export function getSavedMessData(id) {
 export async function buildShareUrl(mess) {
   const envelope = {
     v: SHARE_FORMAT_VERSION,
-    mess: {
-      title: mess.title || 'Untitled',
-      html: mess.html || '',
-      css: mess.css || '',
-      js: mess.js || '',
-      wrapMode: mess.wrapMode || 'onLoad',
-      styleType: mess.styleType || 'css',
-      libraries: mess.libraries || [],
-    },
+    mess: normalizeMess(mess),
   };
   const bytes = await deflateRaw(JSON.stringify(envelope));
-  const base = window.location.href.split('#')[0];
+  // origin + pathname only — never carry the sharer's query string into links
+  const base = window.location.origin + window.location.pathname;
   return `${base}#code=${bytesToBase64Url(bytes)}`;
 }
 
-// Import from URL hash
+// Import from URL hash.
+// Returns 'loaded' (content applied), 'none' (no hash / nothing to load),
+// or 'error' (a share link was present but could not be read) — callers
+// must not treat 'error' like an empty page (e.g. by offering draft restore).
 export async function importFromHash() {
   const hash = window.location.hash.substring(1);
-  if (!hash) return false;
+  if (!hash) return 'none';
 
   if (hash.startsWith('id=')) {
     const id = hash.substring(3);
-    return loadMess(id);
+    return loadMess(id) ? 'loaded' : 'none';
   }
 
   if (hash.startsWith('code=')) {
     if (!isCompressionSupported()) {
-      await shareToast('This share link needs a newer browser — yours is missing compression support.');
-      return false;
+      showToast('This share link needs a newer browser — yours is missing compression support.');
+      return 'error';
     }
     try {
       const json = await inflateRaw(base64UrlToBytes(hash.substring(5)));
@@ -265,47 +265,28 @@ export async function importFromHash() {
         throw new Error('Unrecognized share payload');
       }
       if (typeof envelope.v === 'number' && envelope.v > SHARE_FORMAT_VERSION) {
-        await shareToast('This link is from a newer version of JSMess — loading what we can.');
+        showToast('This link is from a newer version of JSMess — loading what we can.');
       }
-      // Unknown fields are ignored and missing ones get defaults, so
-      // additive format changes never break older apps (docs/SHARE-FORMAT.md).
-      const m = envelope.mess;
-      setMultiple({
-        id: null,
-        title: m.title || 'Shared Mess',
-        html: m.html || '',
-        css: m.css || '',
-        js: m.js || '',
-        wrapMode: m.wrapMode || 'onLoad',
-        styleType: m.styleType || 'css',
-        libraries: m.libraries || [],
-        expiration: 0, // recipient always gets Keep Forever
-      });
-      setContent('html', m.html || '');
-      setContent('css', m.css || '');
-      setContent('js', m.js || '');
-      setDirty(false);
-      return true;
+      // normalizeMess ignores unknown fields, defaults missing ones, and
+      // clamps wrong-typed values, so additive format changes and hostile
+      // payloads never break the app (docs/SHARE-FORMAT.md).
+      // Recipient always gets expiration 0 (Keep Forever) and no id.
+      applyMess(envelope.mess, { titleFallback: 'Shared Mess' });
+      return 'loaded';
     } catch (e) {
       console.error('Failed to import from hash:', e);
-      await shareToast('Could not read this share link — it may be corrupted or from an old version of JSMess.');
-      return false;
+      showToast('Could not read this share link — it may be corrupted or from an old version of JSMess.');
+      return 'error';
     }
   }
 
-  return false;
+  return 'none';
 }
 
 // Export as downloadable .jsmess file
 export function exportToFile() {
   const data = {
-    title: get('title'),
-    html: get('html'),
-    css: get('css'),
-    js: get('js'),
-    wrapMode: get('wrapMode'),
-    styleType: get('styleType'),
-    libraries: get('libraries'),
+    ...getCurrentMessData(),
     expiration: get('expiration') || 0,
     exportedAt: new Date().toISOString(),
   };
@@ -325,21 +306,10 @@ export function importFromFile(file) {
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
-        setMultiple({
-          id: null,
-          title: data.title || 'Imported Mess',
-          html: data.html || '',
-          css: data.css || '',
-          js: data.js || '',
-          wrapMode: data.wrapMode || 'onLoad',
-          styleType: data.styleType || 'sass',
-          libraries: data.libraries || [],
+        applyMess(data, {
+          titleFallback: 'Imported Mess',
           expiration: data.expiration || 0,
         });
-        setContent('html', data.html || '');
-        setContent('css', data.css || '');
-        setContent('js', data.js || '');
-        setDirty(false);
         resolve(true);
       } catch (e) {
         reject(e);
@@ -545,13 +515,7 @@ const DRAFT_KEY = 'jsmess_draft';
 export function saveDraft() {
   const data = {
     id: get('id'),
-    title: get('title'),
-    html: get('html'),
-    css: get('css'),
-    js: get('js'),
-    wrapMode: get('wrapMode'),
-    styleType: get('styleType'),
-    libraries: get('libraries'),
+    ...getCurrentMessData(),
     expiration: get('expiration') || 0,
     savedAt: Date.now(),
   };
@@ -574,21 +538,11 @@ export function loadDraftData() {
 export function restoreDraft() {
   const data = loadDraftData();
   if (!data) return false;
-  setMultiple({
+  applyMess(data, {
     id: data.id || null,
-    title: data.title || 'Untitled',
-    html: data.html || '',
-    css: data.css || '',
-    js: data.js || '',
-    wrapMode: data.wrapMode || 'onLoad',
-    styleType: data.styleType || 'css',
-    libraries: data.libraries || [],
     expiration: data.expiration || 0,
+    dirty: true, // restored content is still unsaved
   });
-  setContent('html', data.html || '');
-  setContent('css', data.css || '');
-  setContent('js', data.js || '');
-  setDirty(true); // restored content is still unsaved
   return true;
 }
 

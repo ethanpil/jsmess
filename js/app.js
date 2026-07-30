@@ -33,13 +33,16 @@ async function init() {
 
   initEditors();
 
-  // Load content before layout so Split.js sizes correctly
-  const loaded = await importFromHash();
-  if (!loaded) maybeRestoreDraft();
+  // Load content before layout so Split.js sizes correctly.
+  // 'error' (unreadable share link) must NOT fall through to the draft
+  // prompt — the error toast is the user's only clue the link failed.
+  const imported = await importFromHash();
+  let draftRestored = false;
+  if (imported === 'none') draftRestored = maybeRestoreDraft();
 
   initLayout();
   initShortcuts();
-  initUI();
+  initUI({ contentLoaded: imported === 'loaded' || draftRestored });
 
   // Run initial preview
   run();
@@ -58,15 +61,33 @@ async function init() {
     setTimeout(() => preloadSass(), 2000);
   }
 
-  // Listen for hash changes (skip ones we caused ourselves via save/share)
-  window.addEventListener('hashchange', async () => {
-    if (consumeHashChangeSuppression()) return;
-    if (window.location.hash.startsWith('#code=') && isDirty()
-        && !confirm('You have unsaved changes that will be lost. Load the shared mess anyway?')) {
+  // Listen for hash changes (skip ones we caused ourselves via save).
+  // Imports run through a queue so rapid Back/Forward navigations apply in
+  // order instead of interleaving mid-decode. appliedHash tracks what the
+  // editors actually show, so declining the dirty guard can put the address
+  // bar back in sync (replaceState fires no hashchange).
+  let importChain = Promise.resolve();
+  let appliedHash = window.location.hash;
+
+  window.addEventListener('hashchange', () => {
+    if (consumeHashChangeSuppression()) {
+      appliedHash = window.location.hash;
       return;
     }
-    await importFromHash();
-    run();
+    importChain = importChain.then(async () => {
+      const newHash = window.location.hash;
+      const willImport = newHash.startsWith('#code=') || newHash.startsWith('#id=');
+      if (willImport && isDirty()
+          && !confirm('You have unsaved changes that will be lost. Load anyway?')) {
+        history.replaceState(null, '', window.location.pathname + window.location.search + appliedHash);
+        return;
+      }
+      const result = await importFromHash();
+      if (result === 'loaded') {
+        appliedHash = newHash;
+        run();
+      }
+    });
   });
 
   // Auto-save a recovery draft while there are unsaved changes
@@ -88,15 +109,16 @@ async function init() {
 
 // Offer to bring back unsaved work from the last session. Declining
 // discards the draft so the prompt doesn't nag on every load.
+// Returns true when a draft was restored.
 function maybeRestoreDraft() {
   const draft = loadDraftData();
-  if (!draft) return;
+  if (!draft) return false;
   const when = draft.savedAt ? new Date(draft.savedAt).toLocaleString() : 'your last session';
   if (confirm(`Restore your unsaved draft from ${when}?`)) {
-    restoreDraft();
-  } else {
-    clearDraft();
+    return restoreDraft();
   }
+  clearDraft();
+  return false;
 }
 
 const DRAFT_SAVE_DELAY_MS = 2000;

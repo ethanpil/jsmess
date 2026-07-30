@@ -458,11 +458,12 @@
   <div id="share-modal" class="modal-overlay hidden">
     <div class="modal" style="max-width:480px;">
       <div class="modal-header">
-        <span>Share Link</span>
+        <span id="share-modal-title">Share Link</span>
         <button id="share-modal-close" class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
         <p class="share-info">This link contains the <strong>full contents and settings</strong> of the mess &mdash; all code, the title, libraries and settings. Nothing is uploaded anywhere: everything is stored in the link itself. Anyone opening it gets their own independent copy.</p>
+        <p id="share-note" class="share-note hidden"></p>
         <div class="share-url-row">
           <input type="text" id="share-url" readonly spellcheck="false">
           <button id="share-copy" class="share-copy-btn">Copy</button>

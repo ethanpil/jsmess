@@ -13,10 +13,14 @@ https://<host>/<path>#code=<payload>
 - `payload` = `base64url( deflate-raw( UTF-8 JSON envelope ) )`
 - base64url = RFC 4648 §5 alphabet (`-` and `_` instead of `+` and `/`), with
   `=` padding stripped.
+- The base of the URL is `origin + pathname` only — the sharer's query
+  string is never carried into a link.
 - Compression/decompression uses the native `CompressionStream` /
-  `DecompressionStream` APIs with the `deflate-raw` format. There is **no
-  fallback** for browsers without these APIs (Safari ≤ 16.3); both creating
-  and opening links shows a clear error toast instead.
+  `DecompressionStream` APIs with the `deflate-raw` format. Support is
+  detected by actually constructing with `'deflate-raw'` (some engines,
+  e.g. Chromium 80–102, have the constructors but not this format). There
+  is **no fallback** for unsupported browsers; both creating and opening
+  links shows a clear error toast instead.
 
 `#id=<localStorageId>` is a separate, local-only hash form for the user's own
 saved messes. It is **not** part of the share format and never leaves the
@@ -34,7 +38,7 @@ user's machine.
     "js": "...",
     "wrapMode": "onLoad",
     "styleType": "css",
-    "libraries": [{ "name": "...", "version": "...", "url": "...", "type": "js" }]
+    "libraries": [{ "url": "...", "type": "js" }]
   }
 }
 ```
@@ -46,7 +50,12 @@ user's machine.
 | `mess.html` / `mess.css` / `mess.js` | string | `""` |
 | `mess.wrapMode` | `onLoad` \| `onDomReady` \| `noWrapHead` \| `noWrapBody` | `"onLoad"` |
 | `mess.styleType` | `css` \| `sass` | `"css"` |
-| `mess.libraries` | array of `{name, version, url, type}` | `[]` |
+| `mess.libraries` | array of `{url, type}` (`type`: `js` \| `css`) | `[]` |
+
+Decoding is defensive: values with the wrong type (or outside the allowed
+set) fall back to the default rather than propagating into the app — a
+hand-crafted payload cannot put a non-string into an editor or a non-array
+into the library list.
 
 ### Deliberately excluded
 
@@ -66,10 +75,11 @@ adding features (new settings, new `styleType` values, editor themes, …):
 2. **Decoders MUST default missing fields** — see the table above. Never
    assume a field is present.
 3. Because of rules 1–2, **additive changes never bump `v`**. Adding a new
-   per-mess setting = add the field to `buildShareUrl`'s envelope, read it
-   with a default in `importFromHash`, and update the table above. Old apps
-   opening new links simply ignore the field; new apps opening old links use
-   the default.
+   per-mess setting = add the field (with its default and type clamp) to
+   `normalizeMess()` in `js/storage.js` — the single pick/normalize helper
+   every serialization surface encodes and decodes through — and update the
+   table above. Old apps opening new links simply ignore the field; new apps
+   opening old links use the default.
 4. **Bump `v` only for breaking changes**: renaming or retyping a field,
    restructuring the envelope, or changing the compression/encoding. (An
    encoding change would in practice also need a new hash key, e.g. `#c2=`,
@@ -80,8 +90,10 @@ adding features (new settings, new `styleType` values, editor themes, …):
 6. **Keep field names aligned across serialization surfaces.** The `mess`
    object uses the same full field names as the `.jsmess` export file and the
    `jsmess_mess_<id>` localStorage records. Full names cost nothing — deflate
-   compresses repeated keys extremely well — and keeping the three shapes
-   aligned means one mental model. When you add a field, add it everywhere.
+   compresses repeated keys extremely well — and keeping the shapes aligned
+   means one mental model. In code this is enforced structurally: all of
+   these surfaces route through `normalizeMess()` / `applyMess()` in
+   `js/storage.js`, so a field added there is added everywhere at once.
 
 ## Size expectations
 

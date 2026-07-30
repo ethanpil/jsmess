@@ -47,7 +47,7 @@ let consoleDroppedCount = 0;    // entries removed to stay under the cap
 let pendingConsoleEntries = [];
 let consoleFlushScheduled = false;
 
-export function initUI() {
+export function initUI({ contentLoaded = false } = {}) {
   setupToolbarActions();
   setupToolsDropdown();
   setupExportDropdown();
@@ -60,7 +60,7 @@ export function initUI() {
   setupMessTitle();
   setupLibraryInput();
   updateLibraryList();
-  setupStyleTypeSelector();
+  setupStyleTypeSelector(contentLoaded);
   setupWrapModeSelector();
   setupExpirationSelector();
   setupCleanupButton();
@@ -462,12 +462,16 @@ function setupMessTitle() {
   });
 }
 
-// Style type selector
-function setupStyleTypeSelector() {
+// Style type selector. The pref is only a default for fresh sessions —
+// when a share link, saved mess, or draft was loaded before initUI ran,
+// its styleType must win over the local preference.
+function setupStyleTypeSelector(contentLoaded) {
   const selector = document.getElementById('style-type');
   if (!selector) return;
 
-  const saved = getPref('styleType') || 'css';
+  const saved = contentLoaded
+    ? (get('styleType') || 'css')
+    : (getPref('styleType') || 'css');
   setState('styleType', saved);
   selector.value = saved;
   updateCssPanelLabel(saved);
@@ -799,24 +803,17 @@ function openMessesModal() {
           <button class="delete" title="Delete">&times;</button>
         </div>
       `;
-      item.querySelector('.share').addEventListener('click', async (e) => {
+      item.querySelector('.share').addEventListener('click', (e) => {
         e.stopPropagation();
-        if (!isCompressionSupported()) {
-          showToast('Sharing requires a newer browser — compression support is missing.');
-          return;
-        }
         // Share the saved snapshot — no loading, no editor or URL changes
         const data = getSavedMessData(f.id);
         if (!data) {
           showToast('Could not read saved mess.');
           return;
         }
-        try {
-          openShareModal(await buildShareUrl(data), data.title);
-        } catch (err) {
-          console.error('Share failed:', err);
-          showToast('Could not create share link.');
-        }
+        shareMess(data, {
+          note: 'This link contains the last saved version of this mess — unsaved edits are not included.',
+        });
       });
       item.querySelector('.load').addEventListener('click', () => {
         if (isDirty() && !confirm('You have unsaved changes that will be lost. Load anyway?')) {
@@ -854,18 +851,48 @@ function closeMessesModal() {
   if (modal) modal.classList.add('hidden');
 }
 
-// Share modal
-async function shareCurrentMess() {
+// Share modal. All three entry points route through shareMess so the
+// feature check and error handling live in one place.
+let shareTitle = 'JSMess'; // fed to navigator.share by the modal's button
+
+async function shareMess(data, { note } = {}) {
   if (!isCompressionSupported()) {
     showToast('Sharing requires a newer browser — compression support is missing.');
     return;
   }
   try {
-    openShareModal(await buildShareUrl(getCurrentMessData()), get('title'));
+    openShareModal(await buildShareUrl(data), data.title, note);
   } catch (e) {
     console.error('Share failed:', e);
     showToast('Could not create share link.');
   }
+}
+
+function shareCurrentMess() {
+  return shareMess(getCurrentMessData());
+}
+
+function closeShareModal() {
+  const modal = document.getElementById('share-modal');
+  const urlInput = document.getElementById('share-url');
+  if (modal) modal.classList.add('hidden');
+  if (urlInput) urlInput.value = ''; // don't retain large URLs, or stale ones
+}
+
+function copyShareUrl(urlInput) {
+  // navigator.clipboard is absent (not just denied) on insecure origins —
+  // guard before dereferencing so the manual fallback actually runs there.
+  if (!navigator.clipboard) {
+    urlInput.select();
+    showToast('Press Ctrl+C to copy');
+    return;
+  }
+  navigator.clipboard.writeText(urlInput.value).then(() => {
+    showToast('Link copied!');
+  }).catch(() => {
+    urlInput.select();
+    showToast('Press Ctrl+C to copy');
+  });
 }
 
 function setupShareModal() {
@@ -877,41 +904,44 @@ function setupShareModal() {
 
   if (overlay) {
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) overlay.classList.add('hidden');
+      if (e.target === overlay) closeShareModal();
     });
   }
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => overlay?.classList.add('hidden'));
+    closeBtn.addEventListener('click', closeShareModal);
   }
   if (urlInput) {
     urlInput.addEventListener('focus', () => urlInput.select());
   }
   if (copyBtn && urlInput) {
-    copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(urlInput.value).then(() => {
-        showToast('Link copied!');
-      }).catch(() => {
-        urlInput.select();
-        showToast('Press Ctrl+C to copy');
-      });
-    });
+    copyBtn.addEventListener('click', () => copyShareUrl(urlInput));
   }
   if (nativeBtn && urlInput) {
     nativeBtn.addEventListener('click', () => {
       // Catch swallows the AbortError from a cancelled share sheet
-      navigator.share({ title: nativeBtn._shareTitle || 'JSMess', url: urlInput.value }).catch(() => {});
+      navigator.share({ title: shareTitle, url: urlInput.value }).catch(() => {});
     });
   }
 }
 
-function openShareModal(url, title) {
+function openShareModal(url, title, note) {
   const modal = document.getElementById('share-modal');
+  const titleEl = document.getElementById('share-modal-title');
   const urlInput = document.getElementById('share-url');
   const sizeEl = document.getElementById('share-size');
+  const noteEl = document.getElementById('share-note');
   const nativeBtn = document.getElementById('share-native');
   if (!modal || !urlInput) return;
 
+  shareTitle = title || 'JSMess';
+  // Name the mess in the header so it's clear which one the link encodes
+  if (titleEl) titleEl.textContent = title ? `Share: ${title}` : 'Share Link';
   urlInput.value = url;
+
+  if (noteEl) {
+    noteEl.textContent = note || '';
+    noteEl.classList.toggle('hidden', !note);
+  }
 
   if (sizeEl) {
     // Beyond ~2000 chars, URLs get truncated by some email clients and apps
@@ -924,7 +954,6 @@ function openShareModal(url, title) {
 
   if (nativeBtn) {
     nativeBtn.classList.toggle('hidden', !navigator.share);
-    nativeBtn._shareTitle = title || 'JSMess';
   }
 
   modal.classList.remove('hidden');
