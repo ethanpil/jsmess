@@ -11,7 +11,10 @@ import {
   loadMess,
   deleteMess,
   updateMessTitle,
-  exportToHash,
+  buildShareUrl,
+  getCurrentMessData,
+  getSavedMessData,
+  isCompressionSupported,
   exportToFile,
   importFromFile,
   exportStaticSite,
@@ -20,7 +23,6 @@ import {
   restoreFullBackup,
   cleanupExpiredMesses,
   getLastCleanupDate,
-  setHashSilently,
 } from './storage.js';
 import {
   addLibrary,
@@ -53,6 +55,7 @@ export function initUI() {
   setupConsole();
   setupSettingsDrawer();
   setupMessesModal();
+  setupShareModal();
   setupShortcutsModal();
   setupMessTitle();
   setupLibraryInput();
@@ -156,17 +159,7 @@ function setupToolbarActions() {
   // Share button
   const shareBtn = document.getElementById('btn-share');
   if (shareBtn) {
-    shareBtn.addEventListener('click', async () => {
-      const hash = await exportToHash();
-      setHashSilently(hash);
-      // Beyond ~2000 chars, URLs get truncated by some browsers and chat apps
-      const lengthNote = hash.length > 2000 ? ' Note: link is very long and may not work everywhere.' : '';
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Link copied to clipboard!' + lengthNote);
-      }).catch(() => {
-        showToast('URL updated — copy from address bar.' + lengthNote);
-      });
-    });
+    shareBtn.addEventListener('click', shareCurrentMess);
   }
 
   // Theme toggle
@@ -801,10 +794,30 @@ function openMessesModal() {
           <div class="mess-item-date">${date} ${expiryLabel}</div>
         </div>
         <div class="mess-item-actions">
+          <button class="share" title="Share link">Share</button>
           <button class="load" title="Load">Open</button>
           <button class="delete" title="Delete">&times;</button>
         </div>
       `;
+      item.querySelector('.share').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!isCompressionSupported()) {
+          showToast('Sharing requires a newer browser — compression support is missing.');
+          return;
+        }
+        // Share the saved snapshot — no loading, no editor or URL changes
+        const data = getSavedMessData(f.id);
+        if (!data) {
+          showToast('Could not read saved mess.');
+          return;
+        }
+        try {
+          openShareModal(await buildShareUrl(data), data.title);
+        } catch (err) {
+          console.error('Share failed:', err);
+          showToast('Could not create share link.');
+        }
+      });
       item.querySelector('.load').addEventListener('click', () => {
         if (isDirty() && !confirm('You have unsaved changes that will be lost. Load anyway?')) {
           return;
@@ -839,6 +852,82 @@ function openMessesModal() {
 function closeMessesModal() {
   const modal = document.getElementById('messes-modal');
   if (modal) modal.classList.add('hidden');
+}
+
+// Share modal
+async function shareCurrentMess() {
+  if (!isCompressionSupported()) {
+    showToast('Sharing requires a newer browser — compression support is missing.');
+    return;
+  }
+  try {
+    openShareModal(await buildShareUrl(getCurrentMessData()), get('title'));
+  } catch (e) {
+    console.error('Share failed:', e);
+    showToast('Could not create share link.');
+  }
+}
+
+function setupShareModal() {
+  const overlay = document.getElementById('share-modal');
+  const closeBtn = document.getElementById('share-modal-close');
+  const urlInput = document.getElementById('share-url');
+  const copyBtn = document.getElementById('share-copy');
+  const nativeBtn = document.getElementById('share-native');
+
+  if (overlay) {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+  }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => overlay?.classList.add('hidden'));
+  }
+  if (urlInput) {
+    urlInput.addEventListener('focus', () => urlInput.select());
+  }
+  if (copyBtn && urlInput) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(urlInput.value).then(() => {
+        showToast('Link copied!');
+      }).catch(() => {
+        urlInput.select();
+        showToast('Press Ctrl+C to copy');
+      });
+    });
+  }
+  if (nativeBtn && urlInput) {
+    nativeBtn.addEventListener('click', () => {
+      // Catch swallows the AbortError from a cancelled share sheet
+      navigator.share({ title: nativeBtn._shareTitle || 'JSMess', url: urlInput.value }).catch(() => {});
+    });
+  }
+}
+
+function openShareModal(url, title) {
+  const modal = document.getElementById('share-modal');
+  const urlInput = document.getElementById('share-url');
+  const sizeEl = document.getElementById('share-size');
+  const nativeBtn = document.getElementById('share-native');
+  if (!modal || !urlInput) return;
+
+  urlInput.value = url;
+
+  if (sizeEl) {
+    // Beyond ~2000 chars, URLs get truncated by some email clients and apps
+    const long = url.length > 2000;
+    sizeEl.classList.toggle('warn', long);
+    sizeEl.textContent = long
+      ? `Link is ${url.length} characters — very long links may not work in email clients and some apps.`
+      : `Link size: ${url.length} characters.`;
+  }
+
+  if (nativeBtn) {
+    nativeBtn.classList.toggle('hidden', !navigator.share);
+    nativeBtn._shareTitle = title || 'JSMess';
+  }
+
+  modal.classList.remove('hidden');
 }
 
 // Keyboard shortcuts modal
@@ -927,6 +1016,11 @@ function setupExportDropdown() {
 async function handleExportAction(action) {
   if (action === 'export-mess') {
     exportToFile();
+    return;
+  }
+
+  if (action === 'export-share') {
+    await shareCurrentMess();
     return;
   }
 

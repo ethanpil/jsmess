@@ -61,6 +61,10 @@ async function init() {
   // Listen for hash changes (skip ones we caused ourselves via save/share)
   window.addEventListener('hashchange', async () => {
     if (consumeHashChangeSuppression()) return;
+    if (window.location.hash.startsWith('#code=') && isDirty()
+        && !confirm('You have unsaved changes that will be lost. Load the shared mess anyway?')) {
+      return;
+    }
     await importFromHash();
     run();
   });

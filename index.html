@@ -113,7 +113,6 @@
   {
     "imports": {
       "split.js": "./js/vendor/split.min.js",
-      "lz-string": "./js/vendor/lz-string.min.js",
       "jszip": "https://esm.sh/jszip@3.10.1"
     }
   }
@@ -201,6 +200,7 @@
           </button>
           <div class="toolbar-dropdown-menu">
             <button data-action="export-mess"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>This Mess</button>
+            <button data-action="export-share"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share Link</button>
             <button data-action="export-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Static Site</button>
             <hr>
             <button data-action="export-backup"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>Full Backup</button>
@@ -450,6 +450,25 @@
       <div class="modal-body">
         <input type="search" id="messes-search" class="messes-search" placeholder="Search messes…" autocomplete="off">
         <div id="messes-list" class="mess-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Modal (after #messes-modal so it stacks above it when both are open) -->
+  <div id="share-modal" class="modal-overlay hidden">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <span>Share Link</span>
+        <button id="share-modal-close" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="share-info">This link contains the <strong>full contents and settings</strong> of the mess &mdash; all code, the title, libraries and settings. Nothing is uploaded anywhere: everything is stored in the link itself. Anyone opening it gets their own independent copy.</p>
+        <div class="share-url-row">
+          <input type="text" id="share-url" readonly spellcheck="false">
+          <button id="share-copy" class="share-copy-btn">Copy</button>
+        </div>
+        <div id="share-size" class="share-size"></div>
+        <button id="share-native" class="share-native-btn hidden">Share via&hellip;</button>
       </div>
     </div>
   </div>

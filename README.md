@@ -12,6 +12,11 @@ JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which 
 
 ## Changelog
 
+_2026_07_30_
+* Share links now use native browser compression (smaller URLs, no vendored library) &mdash; old share links no longer work
+* New Share dialog with copy button and native share support, reachable from the toolbar, the Export menu, and the My Messes list
+* Share link format documented in [docs/SHARE-FORMAT.md](docs/SHARE-FORMAT.md)
+
 _2026_03_24_
 * Mini Map
 * Undo / Redo Buttons

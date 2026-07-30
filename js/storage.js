@@ -1,24 +1,68 @@
-// JSMess Storage - localStorage + URL hash (LZ-String)
+// JSMess Storage - localStorage + URL hash share links
 
 import { getState, setMultiple, get, setDirty } from './state.js';
 import { setContent } from './editors.js';
 import { compileSass, wrapJsCode } from './preview.js';
 import { escapeHtml } from './util.js';
 
-// Lazy-loaded — only needed for shared links (code= hash) and share export
-let _lz = null;
-async function getLZ() {
-  if (!_lz) _lz = (await import('lz-string')).default;
-  return _lz;
+const PREFIX = 'jsmess_mess_';
+
+// ---- Share link codec ------------------------------------------------
+// Format: #code=<base64url(deflate-raw(UTF-8 JSON envelope))>
+// Envelope: { v: SHARE_FORMAT_VERSION, mess: {...} } — see docs/SHARE-FORMAT.md
+// for the schema and the forward-compatibility rules before changing it.
+
+const SHARE_FORMAT_VERSION = 1;
+
+export function isCompressionSupported() {
+  return typeof CompressionStream !== 'undefined'
+      && typeof DecompressionStream !== 'undefined';
 }
 
-const PREFIX = 'jsmess_mess_';
+async function deflateRaw(text) {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+async function inflateRaw(bytes) {
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Response(stream).text(); // decodes UTF-8
+}
+
+function bytesToBase64Url(bytes) {
+  let binary = '';
+  // Chunked — fromCharCode.apply on the whole array hits argument-count limits
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function base64UrlToBytes(str) {
+  const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+  const binary = atob(padded); // throws on malformed input — caught by caller
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+// ui.js statically imports storage.js, so toast access goes through a
+// deferred dynamic import to avoid the static cycle.
+async function shareToast(message) {
+  try {
+    (await import('./ui.js')).showToast(message);
+  } catch (e) {
+    console.warn(message);
+  }
+}
 
 // Self-initiated hash writes (save/share) must not trigger the global
 // hashchange re-import, which would reset editor content and cursor.
 let suppressNextHashChange = false;
 
-export function setHashSilently(hash) {
+function setHashSilently(hash) {
   if (window.location.hash === '#' + hash) return; // no event will fire
   suppressNextHashChange = true;
   window.location.hash = hash;
@@ -154,22 +198,49 @@ export function listMesses() {
   return messes.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
 }
 
-// Encode state to shareable URL hash
-export async function exportToHash() {
-  const LZString = await getLZ();
-  const data = {
-    h: get('html'),
-    c: get('css'),
-    j: get('js'),
-    w: get('wrapMode'),
-    s: get('styleType'),
-    l: get('libraries'),
-    t: get('title'),
-    e: get('expiration') || 0,
+// Current editor state, share-scope only (no expiration, no global prefs)
+export function getCurrentMessData() {
+  return {
+    title: get('title'),
+    html: get('html'),
+    css: get('css'),
+    js: get('js'),
+    wrapMode: get('wrapMode'),
+    styleType: get('styleType'),
+    libraries: get('libraries') || [],
   };
-  const json = JSON.stringify(data);
-  const compressed = LZString.compressToEncodedURIComponent(json);
-  return `code=${compressed}`;
+}
+
+// Full saved record for the My Messes share path (listMesses() only
+// returns summaries)
+export function getSavedMessData(id) {
+  const raw = localStorage.getItem(PREFIX + id);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+// Build a full shareable URL from a mess-shaped object (state snapshot or
+// a saved localStorage record — extra fields like id/expiration are dropped).
+export async function buildShareUrl(mess) {
+  const envelope = {
+    v: SHARE_FORMAT_VERSION,
+    mess: {
+      title: mess.title || 'Untitled',
+      html: mess.html || '',
+      css: mess.css || '',
+      js: mess.js || '',
+      wrapMode: mess.wrapMode || 'onLoad',
+      styleType: mess.styleType || 'css',
+      libraries: mess.libraries || [],
+    },
+  };
+  const bytes = await deflateRaw(JSON.stringify(envelope));
+  const base = window.location.href.split('#')[0];
+  return `${base}#code=${bytesToBase64Url(bytes)}`;
 }
 
 // Import from URL hash
@@ -183,30 +254,41 @@ export async function importFromHash() {
   }
 
   if (hash.startsWith('code=')) {
-    const LZString = await getLZ();
-    const compressed = hash.substring(5);
+    if (!isCompressionSupported()) {
+      await shareToast('This share link needs a newer browser — yours is missing compression support.');
+      return false;
+    }
     try {
-      const json = LZString.decompressFromEncodedURIComponent(compressed);
-      if (!json) return false;
-      const data = JSON.parse(json);
+      const json = await inflateRaw(base64UrlToBytes(hash.substring(5)));
+      const envelope = JSON.parse(json);
+      if (!envelope || typeof envelope !== 'object' || !envelope.mess) {
+        throw new Error('Unrecognized share payload');
+      }
+      if (typeof envelope.v === 'number' && envelope.v > SHARE_FORMAT_VERSION) {
+        await shareToast('This link is from a newer version of JSMess — loading what we can.');
+      }
+      // Unknown fields are ignored and missing ones get defaults, so
+      // additive format changes never break older apps (docs/SHARE-FORMAT.md).
+      const m = envelope.mess;
       setMultiple({
         id: null,
-        title: data.t || 'Shared Mess',
-        html: data.h || '',
-        css: data.c || '',
-        js: data.j || '',
-        wrapMode: data.w || 'onLoad',
-        styleType: data.s || 'sass',
-        libraries: data.l || [],
-        expiration: data.e || 0,
+        title: m.title || 'Shared Mess',
+        html: m.html || '',
+        css: m.css || '',
+        js: m.js || '',
+        wrapMode: m.wrapMode || 'onLoad',
+        styleType: m.styleType || 'css',
+        libraries: m.libraries || [],
+        expiration: 0, // recipient always gets Keep Forever
       });
-      setContent('html', data.h || '');
-      setContent('css', data.c || '');
-      setContent('js', data.j || '');
+      setContent('html', m.html || '');
+      setContent('css', m.css || '');
+      setContent('js', m.js || '');
       setDirty(false);
       return true;
     } catch (e) {
       console.error('Failed to import from hash:', e);
+      await shareToast('Could not read this share link — it may be corrupted or from an old version of JSMess.');
       return false;
     }
   }
