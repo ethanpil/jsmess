@@ -31,8 +31,8 @@ import {
   moveLibrary,
 } from './libraries.js';
 import { setLayout, getLayoutOptions } from './layout.js';
-import { setLineNumbers, setMinimap, setIndentation, setEditorFont, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType, refreshEditors } from './editors.js';
-import { undo, redo } from './cm.js';
+import { setLineNumbers, setMinimap, setIndentation, setEditorFont, applyEditorTheme, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType, refreshEditors } from './editors.js';
+import { undo, redo, EDITOR_THEMES, normalizeEditorThemeId } from './cm.js';
 import { getPref, setPref } from './prefs.js';
 import { escapeHtml, filenameFromUrl } from './util.js';
 import { getShortcutList } from './shortcuts.js';
@@ -69,6 +69,7 @@ export function initUI({ contentLoaded = false } = {}) {
   setupLineNumbersToggle();
   setupMinimapToggle();
   setupIndentSettings();
+  setupEditorThemeSelector();
   setupFontSettings();
 
   // Listen for custom action events from shortcuts
@@ -634,6 +635,22 @@ function updateIndentSizeState(typeSelector, sizeSelector) {
   const isTabs = typeSelector.value === 'tabs';
   sizeSelector.disabled = isTabs;
   sizeSelector.style.opacity = isTabs ? '0.5' : '1';
+}
+
+// Editor theme selector
+function setupEditorThemeSelector() {
+  const selector = document.getElementById('editor-theme');
+  if (!selector) return;
+
+  selector.innerHTML = EDITOR_THEMES.map((t) =>
+    `<option value="${t.id}">${t.label}</option>`
+  ).join('');
+  selector.value = normalizeEditorThemeId(getPref('editorTheme'));
+
+  selector.addEventListener('change', () => {
+    setPref('editorTheme', selector.value);
+    applyEditorTheme();
+  });
 }
 
 // Font settings

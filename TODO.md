@@ -25,7 +25,7 @@
 - [ ] Additional Layouts
     - [x] Tabs
     - [ ] Hide Console
-    - [ ] Color themes
+    - [x] Color themes
 - [ ] Auto Save
 - [ ] Auto Run
 - [ ] Save to server. (Github via token?) (POST to HTTP Server?)

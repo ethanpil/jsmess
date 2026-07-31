@@ -18,6 +18,7 @@ const KEYS = {
   indentSize: 'jsmess_indentSize',
   editorFont: 'jsmess_editorFont',
   fontSize: 'jsmess_fontSize',
+  editorTheme: 'jsmess_editorTheme',
 };
 
 function keyFor(name) {

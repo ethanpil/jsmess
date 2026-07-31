@@ -27,6 +27,11 @@
       var t = s || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', t);
 
+      // No data-editor-theme here on purpose: the attribute only gates rules
+      // that target .cm-editor, which does not exist until initEditors() runs.
+      // initTheme() sets it (validated) well before then, so writing an
+      // unvalidated copy here would buy no paint and risk disagreeing.
+
       // Font: load only the user's selected font (not all 9)
       var fonts = {'Cascadia Code':'Cascadia+Code','Fira Code':'Fira+Code',
         'IBM Plex Mono':'IBM+Plex+Mono','Inconsolata':'Inconsolata',
@@ -48,19 +53,24 @@
   <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="css/console.css">
 
-  <!-- Modulepreload CodeMirror — parse+compile starts during HTML parse -->
+  <!-- Modulepreload CodeMirror — parse+compile starts during HTML parse.
+       Each ?deps= must match js/cm.js byte for byte — the deps list is part of
+       the URL, so a mismatch misses the preload and fetches the module twice
+       (and worse, yields a second copy of it). Note the lists differ per
+       package; see the header comment in js/cm.js for why. -->
   <link rel="modulepreload" href="https://esm.sh/@codemirror/state@6.7.1" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/view@6.43.5" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/commands@6.10.4" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/search@6.7.1" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/autocomplete@6.20.3" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/language@6.12.4" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/lint@6.9.7" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-html@6.4.11" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-css@6.3.1" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-javascript@6.2.5" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@codemirror/theme-one-dark@6.1.3" crossorigin>
-  <link rel="modulepreload" href="https://esm.sh/@replit/codemirror-minimap@0.5.2" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/view@6.43.7?deps=@codemirror/state@6.7.1" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/commands@6.10.4?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/search@6.7.1?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/autocomplete@6.20.3?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/language@6.12.4?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lint@6.9.7?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-html@6.4.11?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-css@6.3.1?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/lang-javascript@6.2.5?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@codemirror/theme-one-dark@6.1.3?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@replit/codemirror-minimap@0.5.2?deps=@codemirror/state@6.7.1,@codemirror/view@6.43.7,@codemirror/language@6.12.4,@lezer/highlight@1.2.3" crossorigin>
+  <link rel="modulepreload" href="https://esm.sh/@lezer/highlight@1.2.3" crossorigin>
 
   <!-- Loading skeleton — renders immediately before any JS executes -->
   <style>
@@ -373,6 +383,12 @@
         <select id="indent-size">
           <option value="2">2 Spaces</option>
           <option value="4">4 Spaces</option>
+        </select>
+      </div>
+      <div class="settings-row">
+        <label for="editor-theme">Editor Theme</label>
+        <select id="editor-theme">
+          <!-- Options are populated from EDITOR_THEMES in ui.js -->
         </select>
       </div>
       <div class="settings-row">
