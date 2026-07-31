@@ -130,6 +130,17 @@
 
   <!-- App entry point -->
   <script type="module" src="js/app.js"></script>
+
+  <!-- Analytics (self-hosted Umami, cookieless). Toolbar buttons carry
+       data-umami-event attributes which this script binds on load. Only the app
+       shell is tracked: the preview iframe (srcdoc, js/preview.js) and exported
+       static sites (exportStaticSite, js/storage.js) build their own HTML and
+       never include this tag. -->
+  <script defer
+    src="https://umami.piliavin.com/script.js"
+    data-website-id="2d6d073b-4104-4c54-98bf-0e781b5be68c"
+    data-performance="true"
+  ></script>
 </head>
 <body>
   <div id="app" class="loading">
@@ -141,7 +152,7 @@
       </div>
 
       <div class="toolbar-actions">
-        <button id="btn-run" class="toolbar-btn primary" title="Run (Ctrl+Enter)">
+        <button id="btn-run" class="toolbar-btn primary" title="Run (Ctrl+Enter)" data-umami-event="Run button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
           <span class="label-text">Run</span>
         </button>
@@ -153,42 +164,42 @@
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="toolbar-dropdown-menu">
-            <button data-action="tidy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H7M21 6H3M21 14H3M21 18H7"/></svg>Tidy</button>
+            <button data-action="tidy" data-umami-event="Tidy button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H7M21 6H3M21 14H3M21 18H7"/></svg>Tidy</button>
             <hr>
-            <button data-action="tabs-to-spaces"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="3 9 6 12 3 15"/></svg>Tabs to Spaces</button>
-            <button data-action="spaces-to-tabs"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="7 9 4 12 7 15"/></svg>Spaces to Tabs</button>
+            <button data-action="tabs-to-spaces" data-umami-event="tabs-to-spaces button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="3 9 6 12 3 15"/></svg>Tabs to Spaces</button>
+            <button data-action="spaces-to-tabs" data-umami-event="spaces-to-tabs button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6H3M21 12H8M21 18H3"/><polyline points="7 9 4 12 7 15"/></svg>Spaces to Tabs</button>
             <hr>
-            <button data-action="shortcuts"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h0M10 10h0M14 10h0M18 10h0M6 14h0M18 14h0M9 14h6"/></svg>Keyboard Shortcuts</button>
+            <button data-action="shortcuts" data-umami-event="shortcuts button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h0M10 10h0M14 10h0M18 10h0M6 14h0M18 14h0M9 14h6"/></svg>Keyboard Shortcuts</button>
             <hr>
-            <button data-action="uppercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L12 4l4 16h4M6 14h12"/></svg>UPPERCASE (Selection)</button>
-            <button data-action="lowercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="5"/><path d="M14 10v10"/></svg>lowercase (Selection)</button>
-            <button data-action="propercase"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h5L12 6l4 14h5M5 14h10"/></svg>Proper Case (Selection)</button>
+            <button data-action="uppercase" data-umami-event="uppercase button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L12 4l4 16h4M6 14h12"/></svg>UPPERCASE (Selection)</button>
+            <button data-action="lowercase" data-umami-event="lowercase button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="15" r="5"/><path d="M14 10v10"/></svg>lowercase (Selection)</button>
+            <button data-action="propercase" data-umami-event="propercase button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h5L12 6l4 14h5M5 14h10"/></svg>Proper Case (Selection)</button>
           </div>
         </div>
 
-        <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)">
+        <button id="btn-undo" class="toolbar-btn" title="Undo (Ctrl+Z)" data-umami-event="Undo button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
           <span class="label-text">Undo</span>
         </button>
 
-        <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)">
+        <button id="btn-redo" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)" data-umami-event="Redo button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
           <span class="label-text">Redo</span>
         </button>
 
         <div class="toolbar-separator"></div>
 
-        <button id="btn-save" class="toolbar-btn" title="Save (Ctrl+S)">
+        <button id="btn-save" class="toolbar-btn" title="Save (Ctrl+S)" data-umami-event="Save button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
           <span class="label-text">Save</span>
         </button>
 
-        <button id="btn-fork" class="toolbar-btn" title="Fork">
+        <button id="btn-fork" class="toolbar-btn" title="Fork" data-umami-event="Fork button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 01-2 2H8a2 2 0 01-2-2V9"/><line x1="12" y1="12" x2="12" y2="15"/></svg>
           <span class="label-text">Fork</span>
         </button>
 
-        <button id="btn-share" class="toolbar-btn" title="Share link">
+        <button id="btn-share" class="toolbar-btn" title="Share link" data-umami-event="Share button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
           <span class="label-text">Share</span>
         </button>
@@ -197,7 +208,7 @@
       <div class="toolbar-spacer"></div>
 
       <div class="toolbar-right">
-        <button id="btn-messes" class="toolbar-btn" title="My Messes">
+        <button id="btn-messes" class="toolbar-btn" title="My Messes" data-umami-event="MyMesses button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
           <span class="label-text">My Messes</span>
         </button>
@@ -209,11 +220,11 @@
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="toolbar-dropdown-menu">
-            <button data-action="export-mess"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>This Mess</button>
-            <button data-action="export-share"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share Link</button>
-            <button data-action="export-static"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Static Site</button>
+            <button data-action="export-mess" data-umami-event="export-mess button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>This Mess</button>
+            <button data-action="export-share" data-umami-event="export-share button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share Link</button>
+            <button data-action="export-static" data-umami-event="export-static button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>Static Site</button>
             <hr>
-            <button data-action="export-backup"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>Full Backup</button>
+            <button data-action="export-backup" data-umami-event="export-backup button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>Full Backup</button>
           </div>
         </div>
 
@@ -224,23 +235,23 @@
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="toolbar-dropdown-menu">
-            <button data-action="import-mess"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Single Mess</button>
+            <button data-action="import-mess" data-umami-event="import-mess button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Single Mess</button>
             <hr>
-            <button data-action="import-restore"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>Full Restore</button>
+            <button data-action="import-restore" data-umami-event="import-restore button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>Full Restore</button>
           </div>
         </div>
 
         <div class="toolbar-separator"></div>
 
-        <button id="btn-show-shortcuts" class="toolbar-btn" title="Keyboard shortcuts (?)">
+        <button id="btn-show-shortcuts" class="toolbar-btn" title="Keyboard shortcuts (?)" data-umami-event="keyboard-shortcuts button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
         </button>
 
-        <button id="btn-settings" class="toolbar-btn" title="Settings">
+        <button id="btn-settings" class="toolbar-btn" title="Settings" data-umami-event="Settings button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </button>
 
-        <button id="btn-theme" class="toolbar-btn" title="Toggle theme">
+        <button id="btn-theme" class="toolbar-btn" title="Toggle theme" data-umami-event="toggle-theme button">
           <span class="theme-icon">&#9789;</span>
         </button>
       </div>
