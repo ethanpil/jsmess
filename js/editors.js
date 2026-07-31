@@ -8,9 +8,10 @@ import {
   lineNumbers, highlightActiveLineGutter,
   showMinimap,
   indentUnit,
+  editorThemeById, normalizeEditorThemeId,
 } from './cm.js';
 import { setState } from './state.js';
-import { getPref } from './prefs.js';
+import { getPref, setPref } from './prefs.js';
 
 const FONT_FALLBACK = "'SF Mono', 'Consolas', 'Monaco', monospace";
 const MINIMAP_HIDE_DELAY = 1500;
@@ -85,7 +86,7 @@ function createEditor(container, lang, stateKey) {
         minimapCompartment.of(isMinimapEnabled() ? getMinimapExtension() : []),
         langExtension,
         updateListener,
-        themeCompartment.of([]),
+        themeCompartment.of(resolveEditorTheme()),
         EditorView.theme({
           '&': { height: '100%' },
           '.cm-scroller': { overflow: 'auto' },
@@ -149,11 +150,51 @@ export function setContent(key, value) {
   });
 }
 
-export function setTheme(isDark) {
-  const theme = isDark ? oneDark : [];
+// The stored id, normalized. Repairs the stored value in place so a corrupt
+// preference (a hand-edited key, or a backup restored from another build —
+// storage.js writes any jsmess_* key verbatim) can't come back on later loads,
+// and so index.html's inline script, which runs before any module and cannot
+// validate, always finds something safe to put in the attribute.
+function getEditorThemeId() {
+  const stored = getPref('editorTheme');
+  const id = normalizeEditorThemeId(stored);
+  if (stored !== null && stored !== id) setPref('editorTheme', id);
+  return id;
+}
+
+function resolveEditorTheme() {
+  const id = getEditorThemeId();
+  // hasOwn, not a bare lookup: 'constructor' and friends are inherited from
+  // Object.prototype and would hand CodeMirror a function instead of an
+  // extension, throwing before any editor exists.
+  if (id !== 'default' && Object.hasOwn(editorThemeById, id)) return editorThemeById[id];
+  // Default: follow the app theme. Read the DOM attribute, not state —
+  // applyTheme() in themes.js sets the attribute before calling us but
+  // updates state after.
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return isDark ? oneDark : [];
+}
+
+export function applyEditorTheme() {
+  document.documentElement.setAttribute('data-editor-theme', getEditorThemeId());
+  const theme = resolveEditorTheme();
   for (const editor of Object.values(editors)) {
     editor.dispatch({
       effects: themeCompartment.reconfigure(theme),
+    });
+  }
+  refreshMinimaps();
+}
+
+// The minimap samples token colors with getComputedStyle during the view
+// update, but CodeMirror mounts a newly configured theme's stylesheet at the
+// *end* of that same update — so the repaint above reads the outgoing theme's
+// colors. A second dispatch, once the styles are in the document, redraws it.
+function refreshMinimaps() {
+  if (!isMinimapEnabled()) return;
+  for (const editor of Object.values(editors)) {
+    editor.dispatch({
+      effects: minimapCompartment.reconfigure(getMinimapExtension()),
     });
   }
 }

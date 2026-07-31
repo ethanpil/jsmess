@@ -1,4 +1,20 @@
-/* JSMess Editor - CodeMirror 6 Overrides */
+/* JSMess Editor - CodeMirror 6 Overrides
+ *
+ * Two sections, and the split matters:
+ *
+ *   1. Structure — sizing, spacing, borders that every editor theme needs.
+ *      Applies to all themes. Must not set colours from the app palette.
+ *   2. Palette   — everything keyed to a --var, inside the single
+ *      [data-editor-theme="default"] block near the bottom of this file.
+ *
+ * A user-selected thememirror theme (Dracula, Solarized Light, ...) brings its
+ * own colours AND its own light/dark base class, which is independent of the
+ * app's data-theme. So an app-palette colour applied globally lands on top of a
+ * theme that may be the opposite brightness — e.g. --bg-panel (white in light
+ * mode) under CodeMirror's &dark tooltip colour (white text). Put new colour
+ * rules in the palette block; put nothing else there. */
+
+/* ===== 1. Structure — applies to every editor theme ===== */
 
 /* Ensure editor fills its container */
 .cm-editor {
@@ -18,46 +34,18 @@
   padding: 0 8px;
 }
 
-/* Gutter styling */
+/* Gutter. The separator is structural — CodeMirror's own base theme draws one
+   only for light themes, so without this the eight dark thememirror themes
+   (most of which reuse their background as the gutter background) show no
+   boundary at all. currentColor keeps it legible on any palette; the Default
+   theme overrides the colour below. */
 .cm-editor .cm-gutters {
-  border-right: 1px solid var(--border-light);
-  background: var(--bg-secondary);
-  color: var(--text-muted);
   font-size: 11px;
-}
-
-.cm-editor .cm-activeLineGutter {
-  background: var(--bg-tertiary);
-}
-
-/* Active line */
-.cm-editor .cm-activeLine {
-  background: var(--accent-light);
-}
-
-[data-theme="dark"] .cm-editor .cm-activeLine {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-/* Selection */
-.cm-editor .cm-selectionBackground {
-  background: rgba(96, 155, 97, 0.2) !important;
-}
-
-.cm-editor.cm-focused .cm-selectionBackground {
-  background: rgba(96, 155, 97, 0.3) !important;
-}
-
-/* Cursor */
-.cm-editor .cm-cursor {
-  border-left-color: var(--accent);
+  border-right: 1px solid rgba(128, 128, 128, 0.3);
 }
 
 /* Autocomplete tooltip */
 .cm-tooltip-autocomplete {
-  border: 1px solid var(--border-color) !important;
-  background: var(--bg-panel) !important;
-  box-shadow: var(--shadow-md) !important;
   border-radius: var(--radius) !important;
   font-size: 12px !important;
 }
@@ -66,41 +54,18 @@
   padding: 4px 8px !important;
 }
 
-.cm-tooltip-autocomplete ul li[aria-selected] {
-  background: var(--accent) !important;
-  color: white !important;
-}
-
-/* Matching brackets */
-.cm-editor .cm-matchingBracket {
-  background: rgba(96, 155, 97, 0.3);
-  outline: 1px solid var(--accent);
-}
-
 /* Search panel */
-.cm-editor .cm-search {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+.cm-editor .cm-search button {
+  border-radius: var(--radius);
 }
 
 .cm-editor .cm-search input {
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius);
-  background: var(--bg-input);
-}
-
-.cm-editor .cm-search button {
   border-radius: var(--radius);
 }
 
 /* Fold gutter */
 .cm-editor .cm-foldGutter span {
-  color: var(--text-muted);
   font-size: 12px;
-}
-
-.cm-editor .cm-foldGutter span:hover {
-  color: var(--accent);
 }
 
 /* Lint markers */
@@ -110,7 +75,6 @@
 
 /* Placeholder */
 .cm-editor .cm-placeholder {
-  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -154,4 +118,92 @@
 
 .panel-icon.result {
   background: var(--accent);
+}
+
+/* ===== 2. Palette — "Default" editor theme only =====
+ *
+ * Every rule that resolves an app palette variable belongs in here. Selecting
+ * any other editor theme switches this whole block off in one step, so the
+ * theme's own colours (and CodeMirror's matching light/dark base theme, which
+ * styles the search panel and tooltips) come through intact.
+ *
+ * Adding a colour rule outside this block is the bug this structure exists to
+ * prevent — it would bleed the app palette into all 16 imported themes. */
+[data-editor-theme="default"] {
+  /* Gutter */
+  & .cm-editor .cm-gutters {
+    border-right-color: var(--border-light);
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+  }
+
+  & .cm-editor .cm-activeLineGutter {
+    background: var(--bg-tertiary);
+  }
+
+  /* Active line */
+  & .cm-editor .cm-activeLine {
+    background: var(--accent-light);
+  }
+
+  &[data-theme="dark"] .cm-editor .cm-activeLine {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  /* Selection */
+  & .cm-editor .cm-selectionBackground {
+    background: rgba(96, 155, 97, 0.2) !important;
+  }
+
+  & .cm-editor.cm-focused .cm-selectionBackground {
+    background: rgba(96, 155, 97, 0.3) !important;
+  }
+
+  /* Cursor */
+  & .cm-editor .cm-cursor {
+    border-left-color: var(--accent);
+  }
+
+  /* Matching brackets */
+  & .cm-editor .cm-matchingBracket {
+    background: rgba(96, 155, 97, 0.3);
+    outline: 1px solid var(--accent);
+  }
+
+  /* Autocomplete tooltip */
+  & .cm-tooltip-autocomplete {
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-panel) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  & .cm-tooltip-autocomplete ul li[aria-selected] {
+    background: var(--accent) !important;
+    color: white !important;
+  }
+
+  /* Search panel */
+  & .cm-editor .cm-search {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  & .cm-editor .cm-search input {
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+  }
+
+  /* Fold gutter */
+  & .cm-editor .cm-foldGutter span {
+    color: var(--text-muted);
+  }
+
+  & .cm-editor .cm-foldGutter span:hover {
+    color: var(--accent);
+  }
+
+  /* Placeholder */
+  & .cm-editor .cm-placeholder {
+    color: var(--text-muted);
+  }
 }

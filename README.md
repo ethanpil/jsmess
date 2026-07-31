@@ -13,6 +13,7 @@ JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which 
 ## Changelog
 
 _2026_07_30_
+* Editor colour themes &mdash; 16 themes from [thememirror](https://github.com/vadimdemedes/thememirror) selectable in Settings, plus "Default" which follows the light/dark toggle
 * Share links now use native browser compression (smaller URLs, no vendored library) &mdash; old share links no longer work
 * New Share dialog with copy button and native share support, reachable from the toolbar, the Export menu, and the My Messes list
 * Share link format documented in [docs/SHARE-FORMAT.md](docs/SHARE-FORMAT.md)

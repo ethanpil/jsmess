@@ -1,7 +1,7 @@
 // JSMess Themes - Dark/Light toggle
 
 import { setState, get } from './state.js';
-import { setTheme as setEditorTheme } from './editors.js';
+import { applyEditorTheme } from './editors.js';
 import { getPref, setPref } from './prefs.js';
 
 export function initTheme() {
@@ -41,6 +41,8 @@ export function isDark() {
 }
 
 function applyTheme(theme) {
+  // Attribute must be set first — applyEditorTheme() reads it to resolve
+  // the "default" editor theme.
   document.documentElement.setAttribute('data-theme', theme);
-  setEditorTheme(theme === 'dark');
+  applyEditorTheme();
 }
