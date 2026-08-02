@@ -1,5 +1,5 @@
 # JSMess
-An open source (MIT) HTML/JS/CSS IDE and fiddling system. 
+An open source ([MIT](LICENSE)) HTML/JS/CSS IDE and fiddling system. 
 JSMess is a fork of [Jstinker](https://github.com/johncipponeri/jstinker) which itself was inspired by [JSFiddle](http://jsfiddle.net/). 
 
 ## Features
@@ -59,22 +59,38 @@ _2025-07-25_
 
 ## License
 
-The MIT License (MIT)
+JSMess is released under the MIT License &mdash; Copyright &copy; 2025-2026 Ethan Piliavin.
+The full text is in [LICENSE](LICENSE).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+### Third-party licenses
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+Every third-party dependency is MIT or MIT-compatible.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+Loaded at runtime from a CDN (not redistributed by this repository):
+
+| Dependency | License |
+| --- | --- |
+| [CodeMirror 6](https://codemirror.net/) &mdash; `state`, `view`, `commands`, `search`, `autocomplete`, `language`, `lint`, `lang-html`, `lang-css`, `lang-javascript`, `theme-one-dark` | MIT |
+| [Lezer](https://lezer.codemirror.net/) &mdash; `common`, `highlight`, `lr`, `html`, `css`, `javascript` | MIT |
+| [@replit/codemirror-minimap](https://github.com/replit/codemirror-minimap) | MIT |
+| [Prettier](https://prettier.io/) (standalone + babel/html/postcss plugins) | MIT |
+| [Dart Sass](https://sass-lang.com/dart-sass/) | MIT |
+| [JSZip](https://stuk.github.io/jszip/) | MIT or GPL-3.0-or-later &mdash; used under MIT |
+| [Google Fonts](https://fonts.google.com/) &mdash; the nine editor fonts | SIL Open Font License 1.1, except Ubuntu Mono (Ubuntu Font Licence 1.0) |
+
+Vendored into this repository, each carrying its upstream license notice:
+
+| Dependency | License |
+| --- | --- |
+| [Split.js](https://split.js.org/) &mdash; `js/vendor/split.min.js` | MIT &copy; Nathan Cahill |
+| [thememirror](https://github.com/vadimdemedes/thememirror) &mdash; `js/vendor/thememirror.js`, `thememirror-meta.js` | MIT &copy; Vadim Demedes |
+
+Assets:
+
+| Asset | License |
+| --- | --- |
+| App logo by [Solar Icons](https://www.figma.com/community/file/1166831539721848736?ref=svgrepo.com) | CC Attribution &mdash; credited in the app's About panel |
+| GitHub mark (`img/github-mark.svg`) | Used per [GitHub's logo guidelines](https://github.com/logos) to link to this repository |
+
+Fonts are linked from Google's CDN rather than bundled, so their licenses govern the
+font files themselves and place no redistribution obligation on this repository.
