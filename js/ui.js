@@ -667,14 +667,22 @@ function setupToolbarOverflow() {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     closeAllDropdowns(menu);
-    btn.setAttribute('aria-expanded', String(menu.classList.toggle('open')));
+    setOverflowExpanded(menu.classList.toggle('open'));
   });
   // Any click that reaches the document closes it — including one on a control
   // inside the menu, which is what should happen once its action has run. The
   // nested dropdown triggers stop propagation, so opening one keeps this open.
   document.addEventListener('click', () => {
     menu.classList.remove('open');
-    btn.setAttribute('aria-expanded', 'false');
+    setOverflowExpanded(false);
+  });
+  // A dismissible popup needs a keyboard way out; without this a keyboard user
+  // can only leave the menu by activating some other control.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !menu.classList.contains('open')) return;
+    closeAllDropdowns();
+    setOverflowExpanded(false);
+    btn.focus();
   });
 
   const apply = () => applyToolbarOverflow(menu);
@@ -687,9 +695,24 @@ function setupToolbarOverflow() {
   window.addEventListener('resize', apply);
 }
 
+// The open class is cleared from several places — a document click, Escape, a
+// breakpoint crossing — and aria-expanded has to follow every one of them, or
+// the button advertises an open menu that is display:none.
+function setOverflowExpanded(open) {
+  document.getElementById('btn-overflow')?.setAttribute('aria-expanded', String(open));
+}
+
 function applyToolbarOverflow(menu) {
   const mobile = isMobileLayout();
   if (mobile === (menu.childElementCount > 0)) return; // already in that state
+
+  // Crossing the breakpoint re-hosts these controls, so any menu left open has
+  // to be closed on the way. Otherwise the open state outlives the move: the
+  // hamburger reappears already open when the viewport comes back, and a
+  // submenu opened inside it returns to the desktop toolbar still open, where
+  // it regains absolute positioning and hangs under the bar untouched.
+  closeAllDropdowns();
+  setOverflowExpanded(false);
 
   if (mobile) {
     for (const { children } of toolbarHome) {

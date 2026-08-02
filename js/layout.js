@@ -127,7 +127,7 @@ function applyLayout(layout) {
 
     // A preview maximized on desktop would otherwise hide every pane here,
     // since .result-maximized hides the editor panels outright.
-    area.classList.remove('result-maximized');
+    clearResultMaximized(area);
 
     const tabBar = document.createElement('div');
     tabBar.className = 'tab-bar';
@@ -142,6 +142,10 @@ function applyLayout(layout) {
         // ui.js fills every .console-count, so the badge tracks the desktop one
         const badge = document.createElement('span');
         badge.className = 'console-count';
+        // Seed it: updateConsoleCount() only runs on a console flush or a
+        // clear, so a bar built after the output already arrived would show
+        // nothing until the next message — which for a finished script is never.
+        badge.textContent = document.getElementById('console-count')?.textContent || '';
         btn.appendChild(badge);
       }
       btn.addEventListener('click', () => switchMobileTab(t.key));
@@ -257,6 +261,19 @@ function applyLayout(layout) {
 
   // Delay editor refresh for DOM to settle
   requestAnimationFrame(() => refreshEditors());
+}
+
+// ui.js owns the maximize button but tracks its state only by toggling classes,
+// so dropping the maximized class here without resetting the button would leave
+// it highlighted and titled "Restore layout" over a layout that is not
+// maximized — where the next click maximizes instead of restoring. Reached by
+// DOM rather than an import because ui.js already imports this module.
+function clearResultMaximized(area) {
+  area.classList.remove('result-maximized');
+  const btn = document.getElementById('btn-maximize-result');
+  if (!btn) return;
+  btn.classList.remove('active');
+  btn.title = 'Maximize preview';
 }
 
 // Mobile shows exactly one pane. Result and Log are two views of the same
