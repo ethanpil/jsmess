@@ -439,6 +439,13 @@ function setupSettingsDrawer() {
     overlay.addEventListener('click', toggleSettings);
   }
 
+  // Escape closes the drawer at every width. It is the conventional way out of
+  // a panel like this on desktop, and it gives the keyboard an exit that never
+  // existed — the other two dismissals, the overlay and the toolbar button, are
+  // both pointer-only.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isSettingsOpen()) toggleSettings();
+  });
 }
 
 function isSettingsOpen() {
