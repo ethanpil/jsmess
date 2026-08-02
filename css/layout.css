@@ -2,8 +2,17 @@
 
 #app {
   display: grid;
+  /* Without an explicit column the grid sizes to its widest content — the
+     nowrap toolbar — so on a phone the column became ~757px and overflow:hidden
+     clipped the excess with no way to scroll to it. minmax(0, 1fr) pins the
+     column to the viewport and lets both rows shrink instead. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: var(--toolbar-height) 1fr;
   height: 100vh;
+  /* Mobile browsers count the collapsing URL bar in vh, which pushes the tab
+     bar under the browser chrome; dvh tracks the visible viewport. Ignored by
+     engines that don't support it, which keep the vh above. */
+  height: 100dvh;
   overflow: hidden;
 }
 
