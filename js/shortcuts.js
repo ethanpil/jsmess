@@ -1,7 +1,7 @@
 // JSMess Keyboard Shortcuts
 
 import { run } from './preview.js';
-import { focusEditor } from './editors.js';
+import { revealEditor } from './layout.js';
 
 const shortcuts = [];
 
@@ -32,17 +32,17 @@ export function initShortcuts() {
 
   // Ctrl/Cmd+1 → Focus HTML editor
   registerShortcut('1', true, false, () => {
-    focusEditor('html');
+    revealEditor('html');
   }, 'Focus HTML editor');
 
   // Ctrl/Cmd+2 → Focus CSS editor
   registerShortcut('2', true, false, () => {
-    focusEditor('css');
+    revealEditor('css');
   }, 'Focus CSS editor');
 
   // Ctrl/Cmd+3 → Focus JS editor
   registerShortcut('3', true, false, () => {
-    focusEditor('js');
+    revealEditor('js');
   }, 'Focus JS editor');
 
   // ? → Show shortcut help (outside the editors; Cmd/Ctrl+/ is taken by

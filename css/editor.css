@@ -90,6 +90,17 @@
   pointer-events: auto;
 }
 
+/* The minimap does not earn its space on a phone: it takes ~62px of the single
+   ~373px pane, and because scrolling flips it to pointer-events:auto for 1.5s,
+   a tap near the right edge just after a flick-scroll drag-scrolls the document
+   instead of placing the caret. display:none reclaims the width and the taps.
+   Breakpoint matches MOBILE_QUERY in js/layout.js. */
+@media (max-width: 768px) {
+  .cm-editor .cm-minimap-gutter {
+    display: none;
+  }
+}
+
 /* Panel label icons */
 .panel-icon {
   display: inline-flex;

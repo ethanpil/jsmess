@@ -87,7 +87,15 @@ function removeGutters(container) {
   container.querySelectorAll('.gutter').forEach(g => g.remove());
 }
 
+let appliedLayout = null;
+
 function applyLayout(layout) {
+  // Rebuilding re-parents #result-panel, which reloads the preview iframe and
+  // re-executes the last-run code. Skipping a no-op rebuild keeps a Settings
+  // layout change on mobile — where the choice is deliberately deferred — from
+  // re-running the user's sketch and resetting them to the HTML tab.
+  if (layout === appliedLayout) return;
+
   destroySplits();
 
   const area = document.querySelector('.editor-area');
@@ -158,7 +166,10 @@ function applyLayout(layout) {
     area.appendChild(jsPanel);
     area.appendChild(resultPanel);
 
-    switchMobileTab('html');
+    // No focus: this runs while the layout is being built, and focusing a
+    // CodeMirror view raises the on-screen keyboard over the pane before the
+    // user has touched anything.
+    switchMobileTab('html', { focus: false });
   } else if (layout === 'columns') {
     // Move all panels to be direct children of .editor-area (Split.js needs shared parent)
     topRow.style.display = 'none';
@@ -259,6 +270,10 @@ function applyLayout(layout) {
     }));
   }
 
+  // Recorded last so a throw part-way through doesn't mark the layout applied
+  // and make the retry a no-op.
+  appliedLayout = layout;
+
   // Delay editor refresh for DOM to settle
   requestAnimationFrame(() => refreshEditors());
 }
@@ -278,7 +293,7 @@ function clearResultMaximized(area) {
 
 // Mobile shows exactly one pane. Result and Log are two views of the same
 // result panel, so selecting either shows that panel and then switches the view.
-function switchMobileTab(key) {
+function switchMobileTab(key, { focus = true } = {}) {
   const editors = { html: 'html-panel', css: 'css-panel', js: 'js-panel' };
   const showResult = key === 'result' || key === 'log';
 
@@ -300,8 +315,19 @@ function switchMobileTab(key) {
 
   requestAnimationFrame(() => {
     refreshEditors();
-    if (!showResult) focusEditor(key);
+    if (focus && !showResult) focusEditor(key);
   });
+}
+
+// Put the user in a given editor. Focusing alone is not enough when only one
+// pane is on screen: on mobile, and in the desktop tabs layout, the target
+// panel may be display:none, and focusing a view inside it does nothing
+// visible. Reveal the pane first, then let that path do the focusing.
+export function revealEditor(key) {
+  if (document.getElementById('mobile-tab-bar')) return switchMobileTab(key);
+  const tabsLeft = document.getElementById('tabs-left');
+  if (tabsLeft) return switchEditorTab(key, tabsLeft);
+  focusEditor(key);
 }
 
 function switchEditorTab(key, container) {

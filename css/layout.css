@@ -802,6 +802,13 @@
   min-height: 0;
 }
 
+/* The selected tab already names the pane, so the panel's own header is a
+   duplicate label costing 27px of the shortest layout in the app. The desktop
+   tabs layout drops it for the same reason (see #tabs-left rule above). */
+#mobile-tab-bar ~ .editor-panel .panel-header {
+  display: none;
+}
+
 /* Defaults for the mobile-only toolbar pieces. Declared before the media query
    so the query's overrides win on source order: the whole toolbar fits on
    desktop, so the hamburger has nothing to do, and the labels added purely for
