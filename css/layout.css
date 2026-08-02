@@ -425,6 +425,12 @@
   right: -360px;
   width: 360px;
   height: calc(100vh - var(--toolbar-height));
+  /* Same reason as #app: on mobile this drawer is full-screen and is the only
+     settings surface, so sizing it against the large viewport put its last rows
+     behind the browser chrome — and its own overflow-y could not rescue them,
+     because scrolling to the end just aligns content with an off-screen bottom
+     edge. Ignored where dvh is unsupported, which keeps the vh above. */
+  height: calc(100dvh - var(--toolbar-height));
   background: var(--bg-panel);
   border-left: 1px solid var(--border-color);
   box-shadow: var(--shadow-md);

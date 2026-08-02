@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- interactive-widget: dvh tracks the collapsing URL bar but not the soft
+       keyboard. Without this the layout viewport stays full height when the
+       keyboard opens, and since html/body/#app are all overflow:hidden the
+       browser can only reveal the caret by panning the visual viewport, which
+       pushes the toolbar and the mobile tab bar off-screen with no way back. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
   <title>JSMess - Code Playground</title>
   <meta name="description" content="JSMess is an open source HTML/CSS/JavaScript code playground. Write, test, and share web code instantly.">
 
