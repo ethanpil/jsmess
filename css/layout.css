@@ -948,6 +948,18 @@
   #overflow-menu .toolbar-dropdown-menu button {
     padding-left: 32px;
   }
+
+  /* Every other row leads with a 14px SVG that the menu styles at 0.7 opacity
+     and no shrink; the theme button uses a text glyph instead, so it needs the
+     same treatment by hand or its label starts at a different x. */
+  #overflow-menu .theme-icon {
+    flex-shrink: 0;
+    width: 14px;
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+    opacity: 0.7;
+  }
 }
 
 /* Library input & list */
