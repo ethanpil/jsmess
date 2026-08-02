@@ -438,6 +438,11 @@ function setupSettingsDrawer() {
   if (overlay) {
     overlay.addEventListener('click', toggleSettings);
   }
+
+}
+
+function isSettingsOpen() {
+  return !!document.getElementById('settings-drawer')?.classList.contains('open');
 }
 
 function toggleSettings() {
@@ -666,6 +671,15 @@ function setupToolbarOverflow() {
   const btn = document.getElementById('btn-overflow');
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
+    // While the settings drawer is up it covers this menu completely — it is
+    // full-width below the breakpoint and paints over both the overlay and the
+    // menu — so opening the menu here would do nothing the user can see. The
+    // hamburger retracts the drawer instead, which is the only control still
+    // on top of it.
+    if (isSettingsOpen()) {
+      toggleSettings();
+      return;
+    }
     closeAllDropdowns(menu);
     setOverflowExpanded(menu.classList.toggle('open'));
   });
