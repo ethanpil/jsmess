@@ -824,6 +824,18 @@
   .toolbar-btn span.label-text {
     display: none;
   }
+
+  /* Touch targets belong to this breakpoint, not the layout one. Everything
+     from here down is an icon-only bar, and the whole tablet range is touch —
+     scoping the floor to 768px left 769-1200px rendering 38x26 controls. */
+  .toolbar-actions .toolbar-btn,
+  .toolbar-right > .toolbar-btn,
+  #btn-overflow {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 6px 8px;
+  }
 }
 
 /* Responsive — see MOBILE_QUERY in js/layout.js, kept in sync with 768px */
@@ -864,16 +876,6 @@
     min-height: 44px;
   }
 
-  /* Toolbar controls that stay in the bar get a real touch target too */
-  .toolbar-actions .toolbar-btn,
-  .toolbar-right > .toolbar-btn,
-  #btn-overflow {
-    min-width: 40px;
-    min-height: 40px;
-    justify-content: center;
-    padding: 6px 8px;
-  }
-
   /* The bar's own separators lose their meaning once most controls move out */
   .toolbar-separator {
     display: none;
@@ -905,6 +907,17 @@
   #overflow-menu > .toolbar-btn:hover,
   #overflow-menu .toolbar-dropdown > .toolbar-btn:hover {
     background: var(--accent-light);
+  }
+
+  /* The menu is absolutely positioned inside #app, which is overflow:hidden, so
+     anything past the viewport is clipped with no scroll to recover it. Eight
+     rows already overflow a landscape phone, and expanding a nested submenu put
+     Settings and Toggle Theme out of reach entirely — the exact failure the
+     hamburger exists to prevent. Cap it and let it scroll instead. */
+  #overflow-menu {
+    max-height: calc(100dvh - var(--toolbar-height) - 12px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   /* Nested Tools/Export/Import menus expand inline rather than flying out over
