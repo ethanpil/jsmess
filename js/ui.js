@@ -423,10 +423,12 @@ function clearConsole() {
 }
 
 function updateConsoleCount() {
-  const badge = document.getElementById('console-count');
-  if (badge) {
-    badge.textContent = consoleTotalCount > 0 ? `(${consoleTotalCount})` : '';
-  }
+  // Two badges can exist at once: the desktop Console tab and, below the
+  // breakpoint, the unified tab bar's Log tab.
+  const text = consoleTotalCount > 0 ? `(${consoleTotalCount})` : '';
+  document.querySelectorAll('.console-count').forEach(badge => {
+    badge.textContent = text;
+  });
 }
 
 // Settings drawer

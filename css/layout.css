@@ -785,7 +785,24 @@
   color: var(--console-warn);
 }
 
-/* Responsive */
+/* Only the mobile layout toggles this; the desktop layouts show the panel
+   unconditionally. Declared outside the media query so a viewport resize can
+   never strand the panel hidden. */
+.result-panel.hidden {
+  display: none;
+}
+
+/* The desktop layouts get their sizes from Split.js inline styles; the mobile
+   layout has no Split, so the one visible pane has to claim the space itself.
+   Keyed off the mobile bar being present rather than the media query, so it
+   can never apply to a desktop layout mid-resize. */
+#mobile-tab-bar ~ .editor-panel,
+#mobile-tab-bar ~ .result-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Responsive — see MOBILE_QUERY in js/layout.js, kept in sync with 768px */
 @media (max-width: 768px) {
   .toolbar-btn span.label-text {
     display: none;
@@ -794,6 +811,37 @@
   .settings-drawer {
     width: 100%;
     right: -100%;
+  }
+
+  /* Brand shrinks to the logo; the toolbar needs every pixel for controls */
+  .toolbar-brand span {
+    display: none;
+  }
+
+  .toolbar-brand {
+    margin-right: 4px;
+  }
+
+  /* One pane at a time, so the result panel fills the area under the tab bar
+     and its own Result/Console tabs are redundant - the unified bar drives
+     them. Maximize goes with them: a single pane is already full screen. */
+  .result-tabs {
+    display: none;
+  }
+
+  .result-panel {
+    border: none;
+  }
+
+  #mobile-tab-bar {
+    flex-shrink: 0;
+  }
+
+  /* 44px minimum touch target (Apple HIG); the desktop bar is deliberately
+     more compact. */
+  #mobile-tab-bar .tab-bar-btn {
+    padding: 14px 8px;
+    min-height: 44px;
   }
 }
 
