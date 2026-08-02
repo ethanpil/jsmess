@@ -245,15 +245,29 @@
 
         <button id="btn-show-shortcuts" class="toolbar-btn" title="Keyboard shortcuts (?)" data-umami-event="keyboard-shortcuts button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
+          <span class="label-text menu-only">Keyboard Shortcuts</span>
         </button>
 
         <button id="btn-settings" class="toolbar-btn" title="Settings" data-umami-event="Settings button">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          <span class="label-text menu-only">Settings</span>
         </button>
 
         <button id="btn-theme" class="toolbar-btn" title="Toggle theme" data-umami-event="toggle-theme button">
           <span class="theme-icon">&#9789;</span>
+          <span class="label-text menu-only">Toggle Theme</span>
         </button>
+
+        <!-- Mobile overflow. Empty here: below the breakpoint setupToolbarOverflow()
+             in js/ui.js MOVES the secondary controls into this menu (moves, not
+             clones, so their listeners keep working) and moves them back above it.
+             Hidden on desktop, where everything fits in the bar. -->
+        <div class="toolbar-dropdown" id="overflow-dropdown">
+          <button class="toolbar-btn" id="btn-overflow" title="More actions" aria-label="More actions" aria-expanded="false" data-umami-event="Overflow menu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="toolbar-dropdown-menu" id="overflow-menu"></div>
+        </div>
       </div>
     </header>
 

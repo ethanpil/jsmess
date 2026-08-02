@@ -802,12 +802,32 @@
   min-height: 0;
 }
 
-/* Responsive — see MOBILE_QUERY in js/layout.js, kept in sync with 768px */
-@media (max-width: 768px) {
+/* Defaults for the mobile-only toolbar pieces. Declared before the media query
+   so the query's overrides win on source order: the whole toolbar fits on
+   desktop, so the hamburger has nothing to do, and the labels added purely for
+   the overflow menu must not appear on the icon-only toolbar buttons. */
+#overflow-dropdown,
+.menu-only {
+  display: none;
+}
+
+/* The toolbar runs out of room long before the layout does, so it gets its own
+   breakpoint. Fully labelled it measures ~1125px here; icon-only the same
+   controls need ~757px. Without this the band below that - which includes
+   tablet landscape at 1024px - shows labels the bar cannot fit and silently
+   clips the trailing controls. The threshold is set above the measured width
+   rather than at it, because label widths shift with the platform font stack
+   and an exact fit would clip on the first system that renders wider. Labels
+   inside the overflow menu are exempt (the id beats this selector), since
+   there they are the only thing naming each row. */
+@media (max-width: 1200px) {
   .toolbar-btn span.label-text {
     display: none;
   }
+}
 
+/* Responsive — see MOBILE_QUERY in js/layout.js, kept in sync with 768px */
+@media (max-width: 768px) {
   .settings-drawer {
     width: 100%;
     right: -100%;
@@ -842,6 +862,65 @@
   #mobile-tab-bar .tab-bar-btn {
     padding: 14px 8px;
     min-height: 44px;
+  }
+
+  /* Toolbar controls that stay in the bar get a real touch target too */
+  .toolbar-actions .toolbar-btn,
+  .toolbar-right > .toolbar-btn,
+  #btn-overflow {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    padding: 6px 8px;
+  }
+
+  /* The bar's own separators lose their meaning once most controls move out */
+  .toolbar-separator {
+    display: none;
+  }
+
+  #overflow-dropdown {
+    display: block;
+  }
+
+  /* Moved controls render as menu rows, so their labels come back - including
+     the ones that are icon-only in the desktop toolbar. */
+  #overflow-menu .label-text,
+  #overflow-menu .menu-only {
+    display: inline;
+  }
+
+  #overflow-menu > .toolbar-btn,
+  #overflow-menu .toolbar-dropdown > .toolbar-btn {
+    display: flex;
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 0;
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+
+  #overflow-menu > .toolbar-btn:hover,
+  #overflow-menu .toolbar-dropdown > .toolbar-btn:hover {
+    background: var(--accent-light);
+  }
+
+  /* Nested Tools/Export/Import menus expand inline rather than flying out over
+     the edge of a phone screen. */
+  #overflow-menu .toolbar-dropdown-menu {
+    position: static;
+    min-width: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--bg-tertiary);
+  }
+
+  #overflow-menu .toolbar-dropdown-menu button {
+    padding-left: 32px;
   }
 }
 

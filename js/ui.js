@@ -30,7 +30,7 @@ import {
   setLibraryType,
   moveLibrary,
 } from './libraries.js';
-import { setLayout, getLayoutOptions } from './layout.js';
+import { setLayout, getLayoutOptions, isMobileLayout, MOBILE_QUERY } from './layout.js';
 import { setLineNumbers, setMinimap, setIndentation, setEditorFont, applyEditorTheme, getActiveEditor, getActiveEditorKey, getContent, setContent, getIndentSize, getIndentType, refreshEditors } from './editors.js';
 import { undo, redo, EDITOR_THEMES, normalizeEditorThemeId } from './cm.js';
 import { getPref, setPref } from './prefs.js';
@@ -71,6 +71,7 @@ export function initUI({ contentLoaded = false } = {}) {
   setupIndentSettings();
   setupEditorThemeSelector();
   setupFontSettings();
+  setupToolbarOverflow();
 
   // Listen for custom action events from shortcuts
   document.addEventListener('action-save', () => handleSave());
@@ -216,7 +217,7 @@ function setupDropdown(dropdownId, buttonId, onAction) {
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    closeAllDropdowns();
+    closeAllDropdowns(menu);
     menu.classList.toggle('open');
   });
 
@@ -639,6 +640,73 @@ function updateIndentSizeState(typeSelector, sizeSelector) {
   sizeSelector.style.opacity = isTabs ? '0.5' : '1';
 }
 
+// Toolbar overflow — 13 controls cannot fit a phone toolbar, so below the
+// breakpoint all but the primary few move into a hamburger menu. The nodes are
+// MOVED rather than cloned: every listener, id and data-umami-event stays
+// attached, so there is no second copy of any control to keep in sync.
+const OVERFLOW_KEEP = ['btn-run', 'btn-undo', 'btn-redo', 'btn-save', 'btn-messes'];
+
+let toolbarHome = null;
+
+function setupToolbarOverflow() {
+  const menu = document.getElementById('overflow-menu');
+  const actions = document.querySelector('.toolbar-actions');
+  const right = document.querySelector('.toolbar-right');
+  if (!menu || !actions || !right) return;
+
+  // Record the desktop arrangement before anything moves, so restoring is an
+  // exact replay rather than a guess about where each control belongs.
+  toolbarHome = [actions, right].map(container => ({
+    container,
+    children: [...container.children],
+  }));
+
+  // Not setupDropdown(): this menu holds relocated controls with their own
+  // listeners, not data-action rows needing a handler.
+  const btn = document.getElementById('btn-overflow');
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllDropdowns(menu);
+    btn.setAttribute('aria-expanded', String(menu.classList.toggle('open')));
+  });
+  // Any click that reaches the document closes it — including one on a control
+  // inside the menu, which is what should happen once its action has run. The
+  // nested dropdown triggers stop propagation, so opening one keeps this open.
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+  });
+
+  const apply = () => applyToolbarOverflow(menu);
+  apply();
+
+  // Same two signals as the layout breakpoint watcher, for the same reason:
+  // the matchMedia change event is not delivered in every environment.
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener('change', apply);
+  window.addEventListener('resize', apply);
+}
+
+function applyToolbarOverflow(menu) {
+  const mobile = isMobileLayout();
+  if (mobile === (menu.childElementCount > 0)) return; // already in that state
+
+  if (mobile) {
+    for (const { children } of toolbarHome) {
+      for (const el of children) {
+        if (el.id === 'overflow-dropdown') continue;
+        if (OVERFLOW_KEEP.includes(el.id)) continue;
+        if (el.classList.contains('toolbar-separator')) continue; // hidden by CSS
+        menu.appendChild(el);
+      }
+    }
+  } else {
+    for (const { container, children } of toolbarHome) {
+      children.forEach(el => container.appendChild(el));
+    }
+  }
+}
+
 // Editor theme selector
 function setupEditorThemeSelector() {
   const selector = document.getElementById('editor-theme');
@@ -1051,9 +1119,14 @@ function updateThemeIcon() {
   }
 }
 
-// Close all open dropdown menus
-function closeAllDropdowns() {
-  document.querySelectorAll('.toolbar-dropdown-menu.open').forEach(m => m.classList.remove('open'));
+// Close all open dropdown menus. `keepAncestorsOf` spares the menus that
+// contain it: on mobile the Tools/Export/Import dropdowns live *inside* the
+// overflow menu, and opening one would otherwise close the menu it sits in.
+function closeAllDropdowns(keepAncestorsOf) {
+  document.querySelectorAll('.toolbar-dropdown-menu.open').forEach(m => {
+    if (keepAncestorsOf && m.contains(keepAncestorsOf)) return;
+    m.classList.remove('open');
+  });
 }
 
 // Export dropdown
